@@ -1,0 +1,44 @@
+global:
+  # The smarthost and SMTP sender used for mail notifications.
+  smtp_smarthost: 'example.smtp.com:587'
+  smtp_from: 'example@examle.com'
+  smtp_auth_username: 'example@example.com'
+  smtp_auth_password: 'example'
+
+  store: 'github.db'
+
+jobs:
+- name: 'githubtrending'
+  # run every one hour at 0 minute
+  cron: '*/1|0'
+  url:
+    test_target: 'examples/githubtrending'
+    target: 'https://github.com/trending{lang}?since=daily'
+    query_parameter:
+      lang: '/python,/go,'
+  parser: 'githubtrending'
+  update:
+    receiver: 'example'
+
+parsers:
+- name: 'githubtrending'
+  base_url: 'https://github.com'
+  base_xpath: 
+  - "//li[@class='col-12 d-block width-full py-4 border-bottom']"
+  attr:
+    url: 'div/h3/a/@href'
+    repo: 'div/h3/a'
+    desc: "div[@class='py-1']/p"
+    lang: "div/span[@itemprop='programmingLanguage']"
+    star: "div/a[@aria-label='Stargazers']"
+    fork: "div/a[@aria-label='Forks']"
+    today: "div/span[@class='float-right']"
+  format:
+    markdown: '[{lang}: {repo}]({url}), star: {star}, fork: {fork}, today-star: {today} <br> {desc}' 
+    html: '<p><a href="{url}">{lang}: {repo}</a> start: {star}, fork: {fork}, today-star: {today}, {desc}</p>'
+
+receivers:
+- name: 'example'
+  email_configs:
+    to: 
+    - 'example@example.com'

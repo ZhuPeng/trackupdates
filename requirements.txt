@@ -1,0 +1,5 @@
+apscheduler==3.0.3
+markdown2
+pyyaml
+chardet
+docopt
