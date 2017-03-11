@@ -254,7 +254,8 @@ def parse_job_cron(cron_str):
     return d
 
 
-def main(args):
+def main():
+    args = docopt(__doc__, version='0.0.1')
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, args['--log'].upper()))
 
@@ -262,5 +263,4 @@ def main(args):
     sched.run()
 
 if __name__ == '__main__':
-    arguments = docopt(__doc__, version='0.1')
-    main(arguments)
+    main()

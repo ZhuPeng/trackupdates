@@ -8,7 +8,7 @@ git clone git@github.com:ZhuPeng/trackupdates.git
 cd trackupdates
 pip install -r requirements.txt
 # update the smtp mail configure to your own
-python trackupdates.py examples/githubtrending.yaml --test
+python trackupdates/trackupdates.py examples/githubtrending.yaml --test
 ```
 The above script running as the yaml configuration file specified, it will track the updates of [github trending](https://github.com/trending?since=daily) with certain `cron` time and notify the contents which match the keywords you specified.
 
