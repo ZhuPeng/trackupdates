@@ -19,6 +19,8 @@ jobs:
   parser: 'githubtrending'
   update:
     receiver: 'example'
+    match:
+      lang: 'Python'
 
 parsers:
 - name: 'githubtrending'

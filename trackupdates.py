@@ -154,6 +154,9 @@ class Job:
         self.crawl = ListCrawl(config, test)
         self.receivers = self.config['update']['emails']
         self.match = self.config['update'].get('match', {})
+        self.filter_funcs = []
+        for k, v in self.match.items():
+            self.filter_funcs.append(keyword_contains(k, v))
         self.test = test
         self.col_map = config['parser_config']['attr']
         self.fmt = config['parser_config'].get('format', {})
@@ -177,8 +180,15 @@ class Job:
             if self.store.get(key) is None:
                 t = self.store.set(key, t)
                 update.append(t)
+
+        update = filter(self._filter, update)
         self.send_mail(update)
         return update
+
+    def _filter(self, item):
+        if len(self.filter_funcs) == 0:
+            return True
+        return any(map(lambda f: f(item), self.filter_funcs))
 
     def send_mail(self, update_items):
         if self.mailer is None:
@@ -189,11 +199,8 @@ class Job:
             logger.warn('receiver not specified')
             return
 
-        for k, v in self.match.items():
-            filter_func = contains(k, v)
-            update_items = filter(filter_func, update_items)
-
         if len(update_items) == 0:
+            logger.info('Donot track any updates in this job.run')
             return
 
         html = utils.markdown2html(update_items)
@@ -201,7 +208,7 @@ class Job:
         self.mailer.send(self.receivers, subject, html, fmt='html')
 
 
-def contains(k, v):
+def keyword_contains(k, v):
     def c(item):
         return v.lower() in getattr(item, k).lower()
     return c
@@ -209,7 +216,7 @@ def contains(k, v):
 
 def print_items(items):
     for i in items:
-        print logger.error(i)
+        logger.info(i)
 
 
 class Scheduler:
@@ -251,7 +258,7 @@ def main(args):
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, args['--log'].upper()))
 
-    sched = Scheduler(args['<yaml>'], args['--test'])
+    sched = Scheduler(args['<yaml>'], test=args['--test'])
     sched.run()
 
 if __name__ == '__main__':
