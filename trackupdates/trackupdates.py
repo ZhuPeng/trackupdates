@@ -254,8 +254,11 @@ def parse_job_cron(cron_str):
     return d
 
 
+__version__ = '0.0.2'
+
+
 def main():
-    args = docopt(__doc__, version='0.0.2')
+    args = docopt(__doc__, version=__version__)
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, args['--log'].upper()))
 

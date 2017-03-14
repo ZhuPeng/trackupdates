@@ -1,8 +1,15 @@
+import ast
+import re
 from setuptools import setup, find_packages
+
+_version_re = re.compile(r'__version__\s+=\s+(.*)')
+with open('trackupdates/trackupdates.py', 'rb') as f:
+        version = str(ast.literal_eval(_version_re.search(
+            f.read().decode('utf-8')).group(1)))
 
 setup(
     name='trackupdates',
-    version='0.0.2',
+    version=version,
     description='A simple yaml-based xpath crawler and esay tracking site updates.',
     author='ZhuPeng',
     author_email='zhupengbupt@gmail.com',
