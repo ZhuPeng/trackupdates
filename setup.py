@@ -15,6 +15,13 @@ setup(
     author_email='zhupengbupt@gmail.com',
     url='https://github.com/ZhuPeng/trackupdates',
     packages=find_packages(),
+    install_requires=[
+        'apscheduler==3.0.3',
+        'markdown2',
+        'pyyaml',
+        'chardet',
+        'docopt',
+    ],
     entry_points={'console_scripts': ['trackupdates = trackupdates.trackupdates:main']},
     license='MIT License',
 )

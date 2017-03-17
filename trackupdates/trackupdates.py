@@ -167,7 +167,7 @@ class Job:
         self.item_class = self.db.create_table_if_not_exists(tname, self.col_map.keys(), self.fmt)
         self.store = database.Table(self.db, self.item_class, ['url'])
 
-    def run(self):
+    def run(self, filterbykeyword=True):
         items = self.crawl.run()
         update = []
         for i in items:
@@ -179,7 +179,8 @@ class Job:
                 t = self.store.set(key, t)
                 update.append(t)
 
-        update = filter(self._filter, update)
+        if filterbykeyword:
+            update = filter(self._filter, update)
         self.send_mail(update)
         return update
 
@@ -263,7 +264,7 @@ def parse_job_cron(cron_str):
     return d
 
 
-__version__ = '0.0.2'
+__version__ = '0.0.6'
 
 
 def main():
