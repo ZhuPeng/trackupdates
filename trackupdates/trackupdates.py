@@ -15,8 +15,6 @@ from docopt import docopt
 import yaml
 import logging
 import utils
-from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import database
 logging.basicConfig()
@@ -223,26 +221,37 @@ class Scheduler:
     def __init__(self, config_path, blocking=True, test=False):
         logger.info('yaml config file path: %s' % config_path)
         self.settings = Settings(config_path)
+        self.blocking = blocking
         if blocking:
+            from apscheduler.schedulers.blocking import BlockingScheduler
             self.sched = BlockingScheduler()
         else:
+            from apscheduler.schedulers.background import BackgroundScheduler
             self.sched = BackgroundScheduler()
         self.test = test
+        self.jobs = {}
         self.mailer = new_mailer_from_settings(self.settings)
         self.db = database.Database(self.settings['global'].get('store', 'track.db'))
+        self._init_job()
 
-    def run(self):
-        self.jobs = {}
+    def add_job(self, *args, **kws):
+        self.sched.add_job(*args, **kws)
+
+    def _init_job(self):
         for config in self.settings.get_all_job_configs():
             job = Job(config, self.db, self.mailer, self.test)
             self.jobs[config['name']] = job
             if 'cron' in config:
                 cron = parse_job_cron(config['cron'])
                 self.sched.add_job(job.run, 'cron', **cron)
-            updates = job.run()
-            if self.test:
-                print_items(updates)
+
+    def run(self):
         try:
+            if self.blocking:
+                for k, job in self.jobs.items():
+                    updates = job.run()
+                    if self.test:
+                        print_items(updates)
             self.sched.start()
         except (KeyboardInterrupt, SystemExit):
             self.sched.shutdown()
