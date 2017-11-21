@@ -74,8 +74,8 @@ def new_mailer_from_settings(settings):
         return None
 
     smtp = glob.get('smtp_smarthost').split(':')
-    fromaddr = glob.get('smtp_from', '')
     user = glob.get('smtp_auth_username', '')
+    fromaddr = glob.get('smtp_from', user)
     passwd = glob.get('smtp_auth_password', '')
 
     return utils.Email(fromaddr, (smtp[0], int(smtp[1])), (user, passwd))
@@ -112,12 +112,21 @@ class Parser:
         return d
 
 
+class Downloader:
+    def __init__(self):
+        pass
+
+    def get(self, url, param, retry=3):
+        return utils.get_data(url, param, retry)
+
+
 class ListCrawl:
     def __init__(self, config, test=False):
         self.config = config
         self.test = test
         self.pconfig = config['parser_config']
         self.parser = Parser(self.config['parser_config'])
+        self.downloader = Downloader()
 
     def _load_content(self):
         self.url_format = self.config['url']['test_target'] if self.test else self.config['url']['target']
@@ -127,14 +136,14 @@ class ListCrawl:
 
         query = self.config['url'].get('query_parameter', {})
         if len(query) == 0:
-            yield utils.get_data(self.url_format, {})
+            yield self.downloader.get(self.url_format, {})
             return
 
         # TODO: Now only support one query parameter with enumerate value
         for k, para in query.items():
             for v in str(para).split(','):
                 d = {k: v}
-                yield utils.get_data(self.url_format.format(**d), {})
+                yield self.downloader.get(self.url_format.format(**d), {})
 
     def run(self):
         items = []
@@ -168,6 +177,7 @@ class Job:
         self.store = database.Table(self.db, self.item_class, ['url'])
 
     def run(self, filterbykeyword=True):
+        logger.info('[%s]: job run' % self.name)
         items = self.crawl.run()
         update = []
         for i in items:
@@ -191,17 +201,18 @@ class Job:
 
     def send_mail(self, update_items):
         if self.mailer is None:
-            logger.warn('email not config')
+            logger.warn('[%s]: email not config' % self.name)
             return
 
         if len(self.receivers) == 0:
-            logger.warn('receiver not specified')
+            logger.warn('[%s]: receiver not specified' % self.name)
             return
 
         if len(update_items) == 0:
-            logger.info('Donot track any updates in this job.run')
+            logger.info('[%s]: Donot track any updates in this job.run' % self.name)
             return
 
+        logger.info('[%s]: Send mail update count %d' % (self.name, len(update_items)))
         html = utils.markdown2html(update_items)
         subject = 'New Update from [%s]' % self.name
         self.mailer.send(self.receivers, subject, html, fmt='html')
