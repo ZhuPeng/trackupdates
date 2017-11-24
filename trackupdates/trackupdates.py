@@ -220,7 +220,10 @@ class Job:
 
 def keyword_contains(k, v):
     def c(item):
-        return v.lower() in getattr(item, k).lower()
+        iattr = getattr(item, k)
+        if type(v) == str and type(iattr) == str:
+            return v.lower() in iattr.lower()
+        return v in getattr(item, k)
     return c
 
 
