@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
-  trackupdates.py <yaml> [--test] [--log=<level>]
+  trackupdates.py <yaml> [--test] [--runjobs=<runjobs>] [--log=<level>]
   trackupdates.py (-h | --help)
   trackupdates.py --version
 
@@ -10,6 +10,7 @@ Options:
   --version     Show version.
   --log=<level>    log level [default: INFO].
   --test        Test parse webpage content in local.
+  --runjobs=<runjobs>    Specify job name with comma, default run all jobs [default: ].
 """
 from docopt import docopt
 import yaml
@@ -235,7 +236,7 @@ def print_items(items):
 
 
 class Scheduler:
-    def __init__(self, config_path, blocking=True, test=False):
+    def __init__(self, config_path, blocking=True, test=False, runjobs=None):
         logger.info('yaml config file path: %s' % config_path)
         self.settings = Settings(config_path)
         self.blocking = blocking
@@ -246,6 +247,7 @@ class Scheduler:
             from apscheduler.schedulers.background import BackgroundScheduler
             self.sched = BackgroundScheduler()
         self.test = test
+        self.runjobs = runjobs.split(',') if type(runjobs) == str and len(runjobs) else []
         self.jobs = {}
         self.mailer = new_mailer_from_settings(self.settings)
         self.db = database.Database(self.settings['global'].get('store', 'track.db'))
@@ -256,8 +258,11 @@ class Scheduler:
 
     def _init_job(self):
         for config in self.settings.get_all_job_configs():
+            name = config['name']
+            if len(self.runjobs) and name not in self.runjobs:
+                continue
             job = Job(config, self.db, self.mailer, self.test)
-            self.jobs[config['name']] = job
+            self.jobs[name] = job
             if 'cron' in config:
                 cron = parse_job_cron(config['cron'])
                 self.sched.add_job(job.run, 'cron', **cron)
@@ -269,7 +274,8 @@ class Scheduler:
                     updates = job.run()
                     if self.test:
                         print_items(updates)
-            self.sched.start()
+            if not self.test:
+                self.sched.start()
         except (KeyboardInterrupt, SystemExit):
             self.sched.shutdown()
 
@@ -280,7 +286,7 @@ def parse_job_cron(cron_str):
     return d
 
 
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 
 
 def main():
@@ -288,7 +294,7 @@ def main():
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, args['--log'].upper()))
 
-    sched = Scheduler(args['<yaml>'], test=args['--test'])
+    sched = Scheduler(args['<yaml>'], test=args['--test'], runjobs=args['--runjobs'])
     sched.run()
 
 if __name__ == '__main__':
