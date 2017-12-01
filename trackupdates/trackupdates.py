@@ -191,7 +191,8 @@ class Job:
 
         if filterbykeyword:
             update = filter(self._filter, update)
-        self.send_mail(update)
+        if not self.test:
+            self.send_mail(update)
         return update
 
     def _filter(self, item):
