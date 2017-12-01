@@ -127,7 +127,7 @@ def format_wrapper(fmt, columns):
     def f(cls):
         data = {}
         for c in columns:
-            data[c] = getattr(cls, c)
+            data[c] = getattr(cls, c, '')
         return unicode(fmt).format(**data)
     return f
 
