@@ -130,6 +130,7 @@ class ListCrawl:
 
     def _load_content(self):
         self.url_format = self.config['url']['test_target'] if self.test else self.config['url']['target']
+        logger.info('Crawl content from format: ' + self.url_format)
         if not self.url_format.startswith('http'):
             yield utils.read_content(self.url_format)
             return
