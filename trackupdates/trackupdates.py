@@ -18,12 +18,14 @@ import logging
 import utils
 from datetime import datetime
 import database
+import server
 logging.basicConfig()
 logger = logging.getLogger(__file__)
 
 
 class Settings:
     def __init__(self, path):
+        logger.info('yaml config file path: %s' % path)
         self.path = path
         with open(path, 'r') as stream:
             self.yml_dict = yaml.load(stream)
@@ -237,7 +239,6 @@ def print_items(items):
 
 class Scheduler:
     def __init__(self, config_path, blocking=True, test=False, runjobs=None):
-        logger.info('yaml config file path: %s' % config_path)
         self.settings = Settings(config_path)
         self.blocking = blocking
         if blocking:
@@ -294,8 +295,10 @@ def main():
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, args['--log'].upper()))
 
-    sched = Scheduler(args['<yaml>'], test=args['--test'], runjobs=args['--runjobs'])
+    settings = Settings(args['<yaml>'])
+    sched = Scheduler(args['<yaml>'], test=args['--test'], runjobs=args['--runjobs'], blocking=False)
     sched.run()
+    server.Server(sched).run()
 
 if __name__ == '__main__':
     main()

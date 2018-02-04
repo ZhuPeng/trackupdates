@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
@@ -49,8 +50,15 @@ class Database(object):
         for c in columns:
             mapper[c] = Column(String(255), nullable=True)
 
+        def json(cls):
+            res = {}
+            for c in mapper:
+                res[c] = getattr(cls, c)
+            return res
+
         table_class = type(tablename, (self.base,), mapper)
         table_class.__repr__ = repr
+        setattr(table_class, 'json', json)
         for k, fmt in format.items():
             setattr(table_class, k, format_wrapper(fmt, columns))
 
