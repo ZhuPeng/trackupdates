@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 import yaml
+import os
 from signal import signal, SIGINT, SIGTERM
-from flask import Flask, request, jsonify, logging, abort
+from flask import Flask, request, jsonify, logging, abort, send_from_directory
 logger = logging.getLogger(__file__)
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class Server:
     def __init__(self, sched):
-        app = Flask(__name__)
+        app = Flask(__name__, static_url_path='')
+        print app.url_map
         app.logger.setLevel(logging.ERROR)
         self.app = app
         self.sched = sched
@@ -19,7 +22,15 @@ class Server:
 
         @app.route('/')
         def index():
-            base_url = "{}://{}".format(request.scheme, request.host)
+            return send_from_directory(os.path.join(dir_path, '../web/dist'), 'index.html')
+
+        @app.route('/<path>')
+        def static_file(path):
+            return send_from_directory(os.path.join(dir_path, '../web/dist'), path)
+
+        @app.route('/api')
+        def api_index():
+            base_url = "{}://{}/api".format(request.scheme, request.host)
             results = {}
             for config in settings.get_all_job_configs():
                 name = config['name']
