@@ -287,7 +287,7 @@ def parse_job_cron(cron_str):
     return d
 
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 
 def main():

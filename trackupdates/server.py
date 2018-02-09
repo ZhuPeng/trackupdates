@@ -10,7 +10,6 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class Server:
     def __init__(self, sched):
         app = Flask(__name__, static_url_path='')
-        print app.url_map
         app.logger.setLevel(logging.ERROR)
         self.app = app
         self.sched = sched
@@ -35,7 +34,7 @@ class Server:
             for config in settings.get_all_job_configs():
                 name = config['name']
                 results[name] = {
-                    'url': '{}/items/{}'.format(base_url, name),
+                    'url': '{}/items?jobname={}'.format(base_url, name),
                 }
             basic_info = {
                 "yaml_config": '{}/_{}'.format(base_url, 'yaml'),
@@ -43,19 +42,21 @@ class Server:
             }
             return jsonify(basic_info)
 
-        @app.route('/_yaml')
+        @app.route('/api/_yaml')
         def get_yaml():
             with open(settings.path, 'r') as stream:
                 yaml_dict = yaml.load(stream)
             return jsonify(yaml_dict)
 
-        @app.route('/items/<jobname>')
-        def get_job_items(jobname):
+        @app.route('/api/items')
+        def get_job_items():
+            jobname = request.args.get('jobname')
             job = self.sched.jobs.get(jobname, None)
             if job is None:
                 abort(404)
             items = [i.json() for i in job.store.iter()]
-            return jsonify(items)
+            columns = [c.key for c in job.store.item_class.__table__.columns]
+            return jsonify({'columns': columns, 'data': items})
 
     def run(self, ip='127.0.0.1', port=5000, **options):
         """Runs the application"""
