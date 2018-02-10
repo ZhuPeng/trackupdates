@@ -54,8 +54,9 @@ class Server:
             job = self.sched.jobs.get(jobname, None)
             if job is None:
                 abort(404)
-            items = [i.json() for i in job.store.iter()]
-            columns = [c.key for c in job.store.item_class.__table__.columns]
+            items = [i.json() for i in job.store.iter(**request.args.to_dict())]
+            columns = [c.key for c in job.store.item_class.__table__.columns if not c.key.startswith('_')]
+            columns = [c for c in columns if not c.startswith('_') and c != 'id' ]
             return jsonify({'columns': columns, 'data': items})
 
     def run(self, ip='127.0.0.1', port=5000, **options):

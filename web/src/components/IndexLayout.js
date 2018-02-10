@@ -43,7 +43,7 @@ class IndexLayout extends React.Component {
     }
 
     handleClick = (e) => {
-        console.log('click ', e);
+        console.log('click: ', e.key);
         this.setState({
             selectedKey: e.key,
         });
@@ -56,8 +56,6 @@ class IndexLayout extends React.Component {
             for (var i in data.items) {
                 menuItem.push(<Menu.Item key={i}><span>{i}</span></Menu.Item>)
             }
-        } else {
-            menuItem.push(<Menu.Item key="loading"><span>loading</span></Menu.Item>)
         }
 
         return (
@@ -73,7 +71,7 @@ class IndexLayout extends React.Component {
                 <Icon className="trigger" type={collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
               </Header>
               <Content style={{ margin: '24px 16px', padding: 24, background: '#fff', minHeight: 280 }}>
-                {selectedKey && <ItemList selectedKey={selectedKey}/>}
+                <ItemList selectedKey={selectedKey}/>
               </Content>
             </Layout>
           </Layout>

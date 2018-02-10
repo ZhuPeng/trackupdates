@@ -6,51 +6,63 @@ class ItemList extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            key: props.selectedKey, 
-            data: '',
+            data: [],
+            columns: [],
             loading: true,
-            selectedKey: '',
         };
         if (props.selectedKey) {
-            this.initStatus()
+            this.initStatus(props.selectedKey)
         }
     }
 
-    initStatus() {
+    componentWillReceiveProps(nextProp) {
+        console.log(nextProp)
+        this.initStatus(nextProp.selectedKey)
+    }
+
+    initStatus(key) {
         var self = this;
-        jobitem.queryItem({jobname: this.state.key}).then(function(res) {
+        console.log('initStatus')
+        jobitem.queryItem({jobname: key, 'num': 500}).then(function(res) {
+            var col = []
+            var d = []
+            if (res.data) {
+              var cold = {}
+              res.data.columns.map((c) => {
+                  cold[c] = 1
+              })
+              res.data.columns.map((c) => {
+                  if (!c.endsWith('url')) {
+                      var curl = c + '_url'
+                      if (c == 'title' || c == 'name' || c == 'repo') {
+                          curl = 'url'
+                      }
+                      var cd = {title: c, dataIndex: c}
+                      if (curl in cold) {
+                          cd['render'] = (text, record) => <a href={record[curl]} target='_blank'>{text}</a>
+                      }
+                      col.push(cd)
+                  }
+              })
+              d = res.data.data
+            }
             self.setState({
-                data: res.data,
+                data: d,
+                columns: col,
                 loading: false,
             })
         })
     }
 
-    componentWillReceiveProps(nextProp) {
-        this.setState({
-            key: nextProp.selectedKey,
-            loading: true,
-        })
-        this.initStatus()
-    }
-
     render() {
-        var {key, data} = this.state;
-        console.log(data)
-        var col = []
-        if (data.columns) {
-          data.columns.map((c) => {
-              col.push({
-                  title: c,
-                  dataIndex: c,
-              })
-          })
-        }
+        var {data, columns, loading} = this.state;
+        // console.log('col: ' + columns)
+        // console.log('data: ' + data)
 
         return (
-          <Table dataSource={data.data} columns={col} />
+          <Table dataSource={data} columns={columns}/>
         )
     }
-
 }
+
 export default ItemList;
