@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import yaml
 import os
+import markdown2
 from signal import signal, SIGINT, SIGTERM
 from flask import Flask, request, jsonify, logging, abort, send_from_directory
 logger = logging.getLogger(__file__)
@@ -51,13 +52,24 @@ class Server:
         @app.route('/api/items')
         def get_job_items():
             jobname = request.args.get('jobname')
+            fmt = request.args.get('format', 'json')
             job = self.sched.jobs.get(jobname, None)
             if job is None:
                 abort(404)
-            items = [i.json() for i in job.store.iter(**request.args.to_dict())]
+            originitems = job.store.iter(**request.args.to_dict())
+            if len(originitems):
+                if getattr(originitems[0], fmt, None) is None:
+                    for f in ['html', 'markdown', 'json']:
+                        if getattr(originitems[0], f, None) is not None:
+                            fmt = f
+                            break
+
+            items = [getattr(i, fmt)() for i in originitems]
             columns = [c.key for c in job.store.item_class.__table__.columns if not c.key.startswith('_')]
-            columns = [c for c in columns if not c.startswith('_') and c != 'id' ]
-            return jsonify({'columns': columns, 'data': items})
+            columns = [c for c in columns if not c.startswith('_') and c != 'id']
+            if fmt == 'markdown':
+                items = [markdown2.markdown(i) for i in items]
+            return jsonify({'columns': columns, 'data': items, 'format': fmt})
 
     def run(self, ip='127.0.0.1', port=5000, **options):
         """Runs the application"""

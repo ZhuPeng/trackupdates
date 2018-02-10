@@ -1,32 +1,40 @@
 import React, { Component, PropTypes } from 'react';
-import { Table, message, Popconfirm } from 'antd';
+import { Table, message, Popconfirm, List, Avatar } from 'antd';
 import * as jobitem from '../services/item';
 
 class ItemList extends React.Component {
     constructor(props) {
         super(props);
+        var fmt = props.formatStyle || 'html'
         this.state = {
             data: [],
             columns: [],
             loading: true,
+            formatStyle: fmt,
+            actualFormat: fmt,
         };
         if (props.selectedKey) {
-            this.initStatus(props.selectedKey)
+            this.initStatus(props.selectedKey, fmt)
         }
     }
 
     componentWillReceiveProps(nextProp) {
         console.log(nextProp)
-        this.initStatus(nextProp.selectedKey)
+        var fmt = nextProp.formatStyle || this.state.formatStyle
+        this.setState({
+            formatStyle: fmt,
+        })
+        this.initStatus(nextProp.selectedKey, fmt)
     }
 
-    initStatus(key) {
+    initStatus(key, fmt) {
         var self = this;
         console.log('initStatus')
-        jobitem.queryItem({jobname: key, 'num': 500}).then(function(res) {
+        jobitem.queryItem({jobname: key, 'num': 500, 'format': fmt}).then(function(res) {
             var col = []
             var d = []
             if (res.data) {
+              console.log(res.data)
               var cold = {}
               res.data.columns.map((c) => {
                   cold[c] = 1
@@ -49,18 +57,20 @@ class ItemList extends React.Component {
             self.setState({
                 data: d,
                 columns: col,
+                actualFormat: res.data.format,
                 loading: false,
             })
         })
     }
 
     render() {
-        var {data, columns, loading} = this.state;
-        // console.log('col: ' + columns)
-        // console.log('data: ' + data)
+        var {data, columns, loading, actualFormat} = this.state;
 
         return (
-          <Table dataSource={data} columns={columns}/>
+          <div>
+            {actualFormat == 'json' && <Table dataSource={data} columns={columns}/>}
+            {(actualFormat == 'markdown' || actualFormat == 'html') && <List itemLayout="horizontal" dataSource={data} renderItem={item => (<List.Item><div dangerouslySetInnerHTML={{__html: item}}></div></List.Item>)}/>}
+          </div>
         )
     }
 }
