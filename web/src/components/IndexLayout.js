@@ -61,7 +61,7 @@ class IndexLayout extends React.Component {
         var menuItem = []
         if (!loading) {
             for (var i in data.items) {
-                menuItem.push(<Menu.Item key={i}><span>{i}</span></Menu.Item>)
+                menuItem.push(<Menu.Item key={i}><span>{data.items[i].name}</span></Menu.Item>)
             }
         }
 

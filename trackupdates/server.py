@@ -36,6 +36,7 @@ class Server:
                 name = config['name']
                 results[name] = {
                     'url': '{}/items?jobname={}'.format(base_url, name),
+                    'name': config.get('view', name),
                 }
             basic_info = {
                 "yaml_config": '{}/_{}'.format(base_url, 'yaml'),
