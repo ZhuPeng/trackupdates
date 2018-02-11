@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import style from './IndexLayout.css';
 import * as jobitem from '../services/item';
 import ItemList from './ItemList';
@@ -68,7 +67,7 @@ class IndexLayout extends React.Component {
         return (
           <Layout>
             <Sider trigger={null} collapsible collapsed={collapsed}>
-              <div className={style["logo"]}></div>
+              <div className={style["logo"]}>TrackUpdates</div>
               <Menu theme="dark" onClick={this.handleClick} selectedKeys={[selectedKey]}>
                 {menuItem}
               </Menu>

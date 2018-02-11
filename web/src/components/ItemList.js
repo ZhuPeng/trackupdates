@@ -1,5 +1,5 @@
-import React, { Component, PropTypes } from 'react';
-import { Table, message, Popconfirm, List, Avatar } from 'antd';
+import React from 'react';
+import { Table, List } from 'antd';
 import * as jobitem from '../services/item';
 
 class ItemList extends React.Component {
@@ -9,7 +9,6 @@ class ItemList extends React.Component {
         this.state = {
             data: [],
             columns: [],
-            loading: true,
             formatStyle: fmt,
             actualFormat: fmt,
         };
@@ -38,11 +37,12 @@ class ItemList extends React.Component {
               var cold = {}
               res.data.columns.map((c) => {
                   cold[c] = 1
+                  return ''
               })
               res.data.columns.map((c) => {
                   if (!c.endsWith('url')) {
                       var curl = c + '_url'
-                      if (c == 'title' || c == 'name' || c == 'repo') {
+                      if (c === 'title' || c === 'name' || c === 'repo') {
                           curl = 'url'
                       }
                       var cd = {title: c, dataIndex: c}
@@ -51,6 +51,7 @@ class ItemList extends React.Component {
                       }
                       col.push(cd)
                   }
+                  return ''
               })
               d = res.data.data
             }
@@ -58,18 +59,17 @@ class ItemList extends React.Component {
                 data: d,
                 columns: col,
                 actualFormat: res.data.format,
-                loading: false,
             })
         })
     }
 
     render() {
-        var {data, columns, loading, actualFormat} = this.state;
+        var {data, columns, actualFormat} = this.state;
 
         return (
           <div>
-            {actualFormat == 'json' && <Table dataSource={data} columns={columns}/>}
-            {(actualFormat == 'markdown' || actualFormat == 'html') && <List itemLayout="horizontal" dataSource={data} renderItem={item => (<List.Item><div dangerouslySetInnerHTML={{__html: item}}></div></List.Item>)}/>}
+            {actualFormat === 'json' && <Table dataSource={data} columns={columns}/>}
+            {(actualFormat === 'markdown' || actualFormat === 'html') && <List itemLayout="horizontal" dataSource={data} renderItem={item => (<List.Item><div dangerouslySetInnerHTML={{__html: item}}></div></List.Item>)}/>}
           </div>
         )
     }
