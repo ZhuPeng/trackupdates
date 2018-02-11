@@ -69,7 +69,8 @@ class Server:
             columns = [c.key for c in job.store.item_class.__table__.columns if not c.key.startswith('_')]
             columns = [c for c in columns if not c.startswith('_') and c != 'id']
             if fmt == 'markdown':
-                items = [markdown2.markdown(i) for i in items]
+                # Markdown donot support open new tab
+                items = [markdown2.markdown(i).replace('href=', 'target="_blank" href=') for i in items]
             return jsonify({'columns': columns, 'data': items, 'format': fmt})
 
     def run(self, ip='127.0.0.1', port=5000, **options):
