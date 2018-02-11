@@ -1,4 +1,4 @@
-#components-layout-demo-custom-trigger .trigger {
+.trigger {
     font-size: 18px;
     line-height: 64px;
     padding: 0 24px;
@@ -6,12 +6,23 @@
     transition: color .3s;
 }
 
-#components-layout-demo-custom-trigger .trigger:hover {
+.trigger:hover {
     color: #1890ff;
 }
 
-#components-layout-demo-custom-trigger .logo {
+.logo {
     height: 32px;
-    background: rgba(255,255,255,.2);
     margin: 16px;
+    background: rgba(255,255,255,.2);
+}
+
+.ant-back-top-inner {
+    height: 40px;
+    width: 40px;
+    line-height: 40px;
+    border-radius: 4px;
+    background-color: #1088e9;
+    color: #fff;
+    text-align: center;
+    font-size: 20px;
 }

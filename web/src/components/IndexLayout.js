@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './IndexLayout.css';
+import style from './IndexLayout.css';
 import * as jobitem from '../services/item';
 import ItemList from './ItemList';
-import { Layout, Menu, Icon, Select } from 'antd';
+import { Layout, Menu, Icon, Select, BackTop } from 'antd';
 const { Header, Sider, Content } = Layout;
 const Option = Select.Option;
 
@@ -67,15 +67,16 @@ class IndexLayout extends React.Component {
 
         return (
           <Layout>
-            <Sider trigger={null} collapsible collapsed={collapsed} >
-              <div className="logo"></div>
-              <Menu theme="dark" mode="inline" onClick={this.handleClick} selectedKeys={[selectedKey]}>
+            <Sider trigger={null} collapsible collapsed={collapsed}>
+              <div className={style["logo"]}></div>
+              <Menu theme="dark" onClick={this.handleClick} selectedKeys={[selectedKey]}>
                 {menuItem}
               </Menu>
+              <BackTop> <div className={style["ant-back-top-inner"]}>UP</div> </BackTop>
             </Sider>
             <Layout>
               <Header style={{ background: '#fff', padding: 0 }}>
-                <Icon className="trigger" type={collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
+                <Icon className={style["trigger"]} type={collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
                 <Select defaultValue={formatStyle} style={{ width: 160, float: 'right', 'padding': '15px' }} onChange={this.handleChange.bind(this)}>
                   <Option value="html">HTML</Option>
                   <Option value="markdown">Markdown</Option>
