@@ -76,10 +76,10 @@ class IndexLayout extends React.Component {
             <Layout>
               <Header style={{ background: '#fff', padding: 0 }}>
                 <Icon className="trigger" type={collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
-                <Select defaultValue={formatStyle} style={{ width: 120 }} onChange={this.handleChange.bind(this)}>
+                <Select defaultValue={formatStyle} style={{ width: 160, float: 'right', 'padding': '15px' }} onChange={this.handleChange.bind(this)}>
                   <Option value="html">HTML</Option>
                   <Option value="markdown">Markdown</Option>
-                  <Option value="json">Table</Option>
+                  <Option value="json">表格</Option>
                 </Select>
               </Header>
               <Content style={{ margin: '24px 16px', padding: 24, background: '#fff', minHeight: 280 }}>
