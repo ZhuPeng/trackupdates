@@ -270,7 +270,7 @@ class Scheduler:
 
     def run(self):
         try:
-            if self.blocking:
+            if self.blocking or self.test:
                 for k, job in self.jobs.items():
                     updates = job.run()
                     if self.test:
