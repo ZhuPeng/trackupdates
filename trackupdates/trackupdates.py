@@ -195,7 +195,8 @@ class Job:
 
         if filterbykeyword:
             update = filter(self._filter, update)
-        if not self.test:
+        logger.info('[%s]: Track updates: %d' % (self.name, len(update)))
+        if not self.test and len(update):
             self.send_mail(update)
         return update
 
@@ -213,10 +214,6 @@ class Job:
             logger.warn('[%s]: receiver not specified' % self.name)
             return
 
-        if len(update_items) == 0:
-            logger.info('[%s]: Donot track any updates in this job.run' % self.name)
-            return
-
         logger.info('[%s]: Send mail update count %d' % (self.name, len(update_items)))
         html = utils.markdown2html(update_items)
         subject = 'New Update from [%s]' % self.name
@@ -224,11 +221,16 @@ class Job:
 
 
 def keyword_contains(k, v):
+    vlist = v.split(',')
+
     def c(item):
-        iattr = getattr(item, k)
-        if type(v) == str and type(iattr) == str:
-            return v.lower() in iattr.lower()
-        return v in getattr(item, k)
+        for v in vlist:
+            iattr = getattr(item, k)
+            logger.debug('%s: %s' % (v, iattr))
+            if v.lower() in iattr.lower():
+                return True
+        else:
+            return False
     return c
 
 
