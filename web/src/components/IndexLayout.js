@@ -3,7 +3,7 @@ import style from './IndexLayout.css';
 import * as jobitem from '../services/item';
 import ItemList from './ItemList';
 import { Layout, Menu, Icon, Select, BackTop } from 'antd';
-const { Header, Sider, Content } = Layout;
+const { Header, Sider, Content, Footer } = Layout;
 const Option = Select.Option;
 
 class IndexLayout extends React.Component {
@@ -67,7 +67,9 @@ class IndexLayout extends React.Component {
         return (
           <Layout>
             <Sider trigger={null} collapsible collapsed={collapsed}>
-              <div className={style["logo"]}>TrackUpdates</div>
+              <div className={style["logo"]} key="logo">
+                <h1 className={style['h1']}>TrackUpdates</h1>
+              </div>
               <Menu theme="dark" onClick={this.handleClick} selectedKeys={[selectedKey]}>
                 {menuItem}
               </Menu>
@@ -85,6 +87,9 @@ class IndexLayout extends React.Component {
               <Content style={{ margin: '24px 16px', padding: 24, background: '#fff', minHeight: 280 }}>
                 <ItemList selectedKey={selectedKey} formatStyle={formatStyle}/>
               </Content>
+              <Footer style={{ textAlign: 'center' }}>
+                GitHub: <a href='https://github.com/ZhuPeng/trackupdates'>TrackUpdates</a> ©2018 Created by Peng ZHU
+              </Footer>
             </Layout>
           </Layout>
       );
