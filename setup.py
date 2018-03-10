@@ -15,6 +15,7 @@ setup(
     author_email='zhupengbupt@gmail.com',
     url='https://github.com/ZhuPeng/trackupdates',
     packages=find_packages(),
+    data_files = [('web/dist/', ['web/dist/index.html', 'web/dist/index.js', 'web/dist/index.css'])],
     install_requires=[
         'apscheduler==3.0.3',
         'markdown2',
