@@ -19,6 +19,7 @@ import utils
 from datetime import datetime
 import database
 import server
+import random
 logging.basicConfig()
 logger = logging.getLogger(__file__)
 
@@ -46,6 +47,8 @@ class Settings:
         config['parser_config'] = self.get_parser(config['parser'])
         if 'update' not in config:
             config['update'] = {}
+        if 'cron' not in config:
+            config['cron'] = '*|%d' % random.randint(0, 59)
         rec_name = config['update'].get('receiver', '')
         config['update']['emails'] = self.get_receivers(rec_name)
         return config
