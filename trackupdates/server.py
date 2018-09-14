@@ -67,8 +67,7 @@ class Server:
                             break
 
             items = [getattr(i, fmt)() for i in originitems]
-            columns = [c.key for c in job.store.item_class.__table__.columns if not c.key.startswith('_')]
-            columns = [c for c in columns if not c.startswith('_') and c != 'id']
+            columns = [c.key for c in job.store.item_class.__table__.columns if c.key != 'id']
             if fmt == 'markdown':
                 # Markdown donot support open new tab
                 items = [markdown2.markdown(i).replace('href=', 'target="_blank" href=') for i in items]
