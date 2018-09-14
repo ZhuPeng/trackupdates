@@ -14,7 +14,7 @@ class IndexLayout extends React.Component {
             data: '',
             loading: true,
             selectedKey: '',
-            formatStyle: 'html',
+            formatStyle: 'markdown',
         };
         this.initStatus()
     }

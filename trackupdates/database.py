@@ -60,7 +60,7 @@ class Database(object):
         table_class.__repr__ = repr
         setattr(table_class, 'json', json)
         for k, fmt in format.items():
-            setattr(table_class, k, format_wrapper(fmt, columns))
+            setattr(table_class, k, format_wrapper(fmt, mapper))
 
         if create:
             table_class.__table__.create(bind=self.engine, checkfirst=True)
