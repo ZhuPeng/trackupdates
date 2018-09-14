@@ -22,6 +22,7 @@ setup(
         'pyyaml',
         'chardet',
         'docopt',
+        'flask',
     ],
     entry_points={'console_scripts': ['trackupdates = trackupdates.trackupdates:main']},
     license='MIT License',
