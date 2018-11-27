@@ -76,11 +76,13 @@ class Database(object):
             return res
         return None
 
-    def last(self, item_class, order_by='_crawl_time', num=10):
+    def last(self, item_class, order_by='_crawl_time', num=10, starttime=None):
         res = []
         try:
             session = self.get_session()
             query = session.query(item_class)
+            if starttime is not None:
+                query = query.filter(getattr(item_class, '_crawl_time') > starttime)
             if hasattr(item_class, order_by):
                 order = desc(getattr(item_class, order_by))
                 query = query.order_by(order)
@@ -157,7 +159,8 @@ class Table(Database):
 
     def iter(self, **kw):
         num = kw.get('num', 20)
-        return self.db.last(self.item_class, num=num)
+        starttime = kw.get('starttime', None)
+        return self.db.last(self.item_class, num=num, starttime=starttime)
 
     def drop(self):
         return self.db.drop(self.item_class)

@@ -16,7 +16,7 @@ from docopt import docopt
 import yaml
 import logging
 import utils
-from datetime import datetime
+from datetime import datetime, timedelta
 import database
 import server
 import random
@@ -58,6 +58,9 @@ class Settings:
             if r['name'] == name:
                 return r['email_configs']['to']
         return []
+
+    def get_daily_report_receivers(self):
+        return self.get_receivers(self.yml_dict['global'].get('daily_report_receivers', ''))
 
     def get_all_job_configs(self):
         for config in self.yml_dict['jobs']:
@@ -208,19 +211,23 @@ class Job:
             return True
         return any(map(lambda f: f(item), self.filter_funcs))
 
-    def send_mail(self, update_items):
+    def send_mail(self, update_items, head="New Update From", receivers=[]):
         if self.mailer is None:
             logger.warn('[%s]: email not config' % self.name)
             return
+        if len(receivers) == 0:
+            receivers = self.receivers
 
-        if len(self.receivers) == 0:
+        if len(receivers) == 0:
             logger.warn('[%s]: receiver not specified' % self.name)
+            return
+        if len(update_items) == 0:
             return
 
         logger.info('[%s]: Send mail update count %d' % (self.name, len(update_items)))
         html = utils.markdown2html(update_items)
-        subject = 'New Update from [%s]' % self.name
-        self.mailer.send(self.receivers, subject, html, fmt='html')
+        subject = '%s [%s]' % (head, self.name)
+        self.mailer.send(receivers, subject, html, fmt='html')
 
 
 def keyword_contains(k, v):
@@ -258,6 +265,15 @@ class Scheduler:
         self.mailer = new_mailer_from_settings(self.settings)
         self.db = database.Database(self.settings['global'].get('store', 'track.db'))
         self._init_job()
+        self.sched.add_job(self.daily_report, 'cron', **parse_job_cron('18|30'))
+
+    def daily_report(self):
+        receivers = self.settings.get_daily_report_receivers()
+        if len(receivers) == 0:
+            return
+        for k, job in self.jobs.items():
+            items = job.store.iter(starttime=datetime.now()-timedelta(days=1), num=50)
+            job.send_mail(items, head="Daily Report From", receivers=receivers)
 
     def add_job(self, *args, **kws):
         self.sched.add_job(*args, **kws)
