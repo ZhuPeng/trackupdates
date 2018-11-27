@@ -45,7 +45,7 @@ class Settings:
 
     def _complete_job_config(self, config):
         config['parser_config'] = self.get_parser(config['parser'])
-        if 'update' not in config:
+        if 'update' not in config or config['update'] is None:
             config['update'] = {}
         if 'cron' not in config:
             config['cron'] = '*|%d' % random.randint(0, 59)
