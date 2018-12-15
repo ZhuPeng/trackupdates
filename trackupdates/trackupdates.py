@@ -285,9 +285,8 @@ class Scheduler:
                 continue
             job = Job(config, self.db, self.mailer, self.test)
             self.jobs[name] = job
-            if 'cron' in config:
-                cron = parse_job_cron(config['cron'])
-                self.sched.add_job(job.run, 'cron', **cron)
+            cron = parse_job_cron(config.get('cron', '10-23|*/30'))
+            self.sched.add_job(job.run, 'cron', **cron)
 
     def run(self):
         try:
