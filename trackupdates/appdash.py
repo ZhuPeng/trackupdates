@@ -4,7 +4,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from flask import Flask
-import datetime
+from datetime import datetime as dt, timedelta
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -20,11 +20,19 @@ def genlayout(options):
         options=[{'label': 'Select All', 'value': 'Select All'}],
         values=['Select All']
     )
+    style = {'width': '75%', 'float': 'right', 'display': 'inline-block', 'line-height': '60px'}
 
-    layout = html.Div(children=[
+    init = dt.now()-timedelta(days=30)
+    layout = html.Div([
         html.H1(children='TrackUpdates Dash'),
         itemDropdown,
-        selectAllCheckbox,
+        html.Div([
+            html.Div([html.P(children='Start Date: ')], style={'width': '8%', 'display': 'inline-block'}),
+            html.Div([
+                dcc.DatePickerSingle(id='date-picker-single', date=dt(init.year, init.month, init.day))], style={'width': '15%', 'display': 'inline-block'}
+            ),
+            html.Div([selectAllCheckbox], style=style),
+        ]),
         dcc.Graph(id='graph')
     ])
     return layout
@@ -45,16 +53,17 @@ def gendash(server, sched):
             return jobs.keys()
         return jobs.keys()[0]
 
-    @app.callback(Output('graph', 'figure'), [Input('item-dropdown', 'value')])
-    def callback_item(dropdown_values):
+    @app.callback(Output('graph', 'figure'), [Input('item-dropdown', 'value'), Input('date-picker-single', 'date')])
+    def callback_item(dropdown_values, start_date):
         if type(dropdown_values) is not list:
             dropdown_values = [dropdown_values]
-        print 'select_options: %s' % (', '.join(dropdown_values))
+        print 'callback_item: ', start_date, ', '.join(dropdown_values)
 
         data, x = [], []
-        now = datetime.datetime.now()
-        for i in range(30)[::-1]:
-            x.append((now - datetime.timedelta(days=i)).strftime("%Y/%m/%d"))
+        now = dt.now()
+        start = dt.strptime(start_date, "%Y-%m-%d")
+        for i in range((now-start).days+1)[::-1]:
+            x.append((now - timedelta(days=i)).strftime("%Y-%m-%d"))
 
         for dropdown_value in dropdown_values:
             count = {}
@@ -62,9 +71,9 @@ def gendash(server, sched):
                 count[i] = 0
 
             job = jobs[dropdown_value]
-            items = sched.jobs[job].store.iter(num=9999)
+            items = sched.jobs[job].store.iter(starttime=start_date)
             for i in items:
-                d = i._crawl_time.strftime("%Y/%m/%d")
+                d = i._crawl_time.strftime("%Y-%m-%d")
                 if d not in count:
                     continue
                 count[d] += 1
