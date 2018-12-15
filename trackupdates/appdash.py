@@ -5,6 +5,12 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from flask import Flask
 from datetime import datetime as dt, timedelta
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+nltk.download('stopwords')
+nltk.download('punkt')
+STOPWORDS = stopwords.words('english')
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -33,9 +39,16 @@ def genlayout(options):
             ),
             html.Div([selectAllCheckbox], style=style),
         ]),
-        dcc.Graph(id='graph')
+        dcc.Graph(id='crawl-count-graph'),
+        dcc.Graph(id='top-count-words-graph'),
     ])
     return layout
+
+
+def is_filter_word(w):
+    if w not in STOPWORDS and w.isalpha():
+        return True
+    return False
 
 
 def gendash(server, sched):
@@ -53,38 +66,59 @@ def gendash(server, sched):
             return jobs.keys()
         return jobs.keys()[0]
 
-    @app.callback(Output('graph', 'figure'), [Input('item-dropdown', 'value'), Input('date-picker-single', 'date')])
-    def callback_item(dropdown_values, start_date):
+    @app.callback(Output('crawl-count-graph', 'figure'), [Input('item-dropdown', 'value'), Input('date-picker-single', 'date')])
+    def callback_crawl_count(dropdown_values, start_date):
+        x, dbs = db_select(dropdown_values, start_date)
+        data = []
+        for k, items in dbs.items():
+            count, y = {}, []
+            for i in items:
+                day = i._crawl_time.strftime("%Y-%m-%d")
+                count[day] = count.get(day, 0) + 1
+            for j in x:
+                y.append(count.get(j, 0))
+            data.append({'x': x, 'y': y, 'type': 'line', 'name': k})
+        return {'data': data, 'layout': {'title': 'Crawl Count'}}
+
+    @app.callback(Output('top-count-words-graph', 'figure'), [Input('item-dropdown', 'value'), Input('date-picker-single', 'date')])
+    def callback_top_words(dropdown_values, start_date):
+        x, dbs = db_select(dropdown_values, start_date)
+        data, top_words, day_words_cnt = [], {}, {}
+        for i in x:
+            day_words_cnt[i] = {}
+        for k, items in dbs.items():
+            for i in items:
+                if not hasattr(i, 'title'):
+                    continue
+                day = i._crawl_time.strftime("%Y-%m-%d")
+                for w in word_tokenize(i.title):
+                    w = w.lower()
+                    top_words[w] = top_words.get(w, 0), + 1
+                    day_words_cnt[day][w] = day_words_cnt[day].get(w, 0) + 1
+        words = [w[0] for w in sorted(top_words.items(), key=lambda d: d[1], reverse=True)[:100] if is_filter_word(w[0])]
+        for w in words:
+            y = []
+            for i in x:
+                y.append(day_words_cnt[i].get(w, 0))
+            data.append({'x': x, 'y': y, 'type': 'line', 'name': w})
+        return {'data': data, 'layout': {'title': 'Crawl Count'}}
+
+    def db_select(dropdown_values, start_date):
         if type(dropdown_values) is not list:
             dropdown_values = [dropdown_values]
-        print 'callback_item: ', start_date, ', '.join(dropdown_values)
+        print 'callback: ', start_date, ', '.join(dropdown_values)
 
-        data, x = [], []
+        data, x = {}, []
         now = dt.now()
         start = dt.strptime(start_date, "%Y-%m-%d")
         for i in range((now-start).days+1)[::-1]:
             x.append((now - timedelta(days=i)).strftime("%Y-%m-%d"))
 
         for dropdown_value in dropdown_values:
-            count = {}
-            for i in x:
-                count[i] = 0
-
             job = jobs[dropdown_value]
             items = sched.jobs[job].store.iter(starttime=start_date)
-            for i in items:
-                d = i._crawl_time.strftime("%Y-%m-%d")
-                if d not in count:
-                    continue
-                count[d] += 1
-            y = []
-            for i in x:
-                y.append(count[i])
-            data.append({'x': x, 'y': y, 'type': 'line', 'name': dropdown_value})
-        return {
-            'data': data,
-            'layout': {'title': '每天抓取数量'}
-        }
+            data[dropdown_value] = items
+        return x, data
     return app
 
 if __name__ == '__main__':
