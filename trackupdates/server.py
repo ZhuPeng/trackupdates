@@ -13,8 +13,8 @@ class Server:
     def __init__(self, sched):
         server = Flask(__name__, static_url_path='')
         server.logger.setLevel(logging.ERROR)
-        self.dash = appdash.gendash(server)
         self.sched = sched
+        self.dash = appdash.gendash(server, sched)
         self.init_route()
 
     def init_route(self):
@@ -84,7 +84,7 @@ class Server:
         for _signal in [SIGINT, SIGTERM]:
             signal(_signal, self.stop)
 
-        self.dash.run_server(port=port, **options)
+        self.dash.run_server(port=port, debug=True, **options)
 
     def stop(self, signal, frame):
         logger.info('Server Stopped')
