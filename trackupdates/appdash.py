@@ -15,10 +15,16 @@ def genlayout(options):
         select_options.append({'label': o, 'value': o})
     select_all = [o['label'] for o in select_options]
     itemDropdown = dcc.Dropdown(id='item-dropdown', multi=True, options=select_options, value=select_all)
+    selectAllCheckbox = dcc.Checklist(
+        id='select-all',
+        options=[{'label': 'Select All', 'value': 'Select All'}],
+        values=['Select All']
+    )
 
     layout = html.Div(children=[
         html.H1(children='TrackUpdates Dash'),
         itemDropdown,
+        selectAllCheckbox,
         dcc.Graph(id='graph')
     ])
     return layout
@@ -31,6 +37,13 @@ def gendash(server, sched):
         jobs[config.get('view', config['name'])] = config['name']
 
     app.layout = genlayout(jobs.keys())
+
+    @app.callback(Output('item-dropdown', 'value'), [Input('select-all', 'values')])
+    def select_all(select):
+        print 'select_all: ', select
+        if 'Select All' in select:
+            return jobs.keys()
+        return jobs.keys()[0]
 
     @app.callback(Output('graph', 'figure'), [Input('item-dropdown', 'value')])
     def callback_item(dropdown_values):
