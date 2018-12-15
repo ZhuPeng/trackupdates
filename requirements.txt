@@ -3,3 +3,7 @@ markdown2
 pyyaml
 chardet
 docopt
+dash
+dash-html-components
+dash-core-components
+dash-table

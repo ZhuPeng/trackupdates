@@ -2,6 +2,7 @@
 import yaml
 import os
 import markdown2
+import appdash
 from signal import signal, SIGINT, SIGTERM
 from flask import Flask, request, jsonify, logging, abort, send_from_directory
 logger = logging.getLogger(__file__)
@@ -10,19 +11,23 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Server:
     def __init__(self, sched):
-        app = Flask(__name__, static_url_path='')
-        app.logger.setLevel(logging.ERROR)
-        self.app = app
+        server = Flask(__name__, static_url_path='')
+        server.logger.setLevel(logging.ERROR)
+        self.dash = appdash.gendash(server)
         self.sched = sched
         self.init_route()
 
     def init_route(self):
-        app = self.app
+        app = self.dash.server
         settings = self.sched.settings
 
         @app.route('/')
         def index():
             return send_from_directory(os.path.join(dir_path, '../web/dist'), 'index.html')
+
+        @app.route('/dash/')
+        def dash():
+            return appdash.app.index()
 
         @app.route('/<path>')
         def static_file(path):
@@ -79,7 +84,7 @@ class Server:
         for _signal in [SIGINT, SIGTERM]:
             signal(_signal, self.stop)
 
-        self.app.run(ip, port, **options)
+        self.dash.run_server(port=port, **options)
 
     def stop(self, signal, frame):
         logger.info('Server Stopped')
