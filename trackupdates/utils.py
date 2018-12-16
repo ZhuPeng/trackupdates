@@ -70,6 +70,7 @@ def get_data(url, param, retry=3):
         retry -= 1
         try:
             opener = urllib2.build_opener()
+            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
             if len(param) != 0:
                 f = opener.open(url, urllib.urlencode(param), 120)
             else:
@@ -131,3 +132,6 @@ def read_content(filename):
     rawdata = f.read()
     f.close()
     return decode_rawdata(rawdata)
+
+if __name__ == '__main__':
+    get_data('http://www.sge.com.cn/', {})
