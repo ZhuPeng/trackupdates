@@ -101,7 +101,7 @@ def gendash(server, sched):
             for i in x:
                 y.append(day_words_cnt[i].get(w, 0))
             data.append({'x': x, 'y': y, 'type': 'line', 'name': w})
-        return {'data': data, 'layout': {'title': 'Crawl Count'}}
+        return {'data': data, 'layout': {'title': 'Top Count Words'}}
 
     def db_select(dropdown_values, start_date):
         if type(dropdown_values) is not list:
