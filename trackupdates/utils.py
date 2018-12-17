@@ -72,7 +72,7 @@ def get_data(url, param, retry=3):
             opener = urllib2.build_opener()
             opener.addheaders = [('User-agent', 'Mozilla/5.0')]
             if len(param) != 0:
-                f = opener.open(urllib.urlencode(url), urllib.urlencode(param), 120)
+                f = opener.open(url, urllib.urlencode(param), 120)
             else:
                 f = opener.open(url, None, 120)
 

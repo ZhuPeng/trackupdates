@@ -21,6 +21,7 @@ import database
 import server
 import random
 import thread
+import urllib
 logging.basicConfig()
 logger = logging.getLogger(__file__)
 
@@ -164,7 +165,7 @@ class ListCrawl:
                         if v[0]:
                             values_list.append(v[0])
                 for v in values_list:
-                    d = {k: v}
+                    d = {k: urllib.quote_plus(v)}
                     url = self.url_format.format(**d)
                     logger.info('Crawl content url: ' + url)
                     yield self.downloader.get(url, {})
