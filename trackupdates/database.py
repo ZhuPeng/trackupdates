@@ -77,21 +77,25 @@ class Database(object):
         return None
 
     def last(self, item_class, order_by='_crawl_time', num=10, starttime=None):
-        res = []
-        try:
-            session = self.get_session()
+        def q(session):
             query = session.query(item_class)
             if starttime is not None:
                 query = query.filter(getattr(item_class, '_crawl_time') > starttime)
             if hasattr(item_class, order_by):
                 order = desc(getattr(item_class, order_by))
                 query = query.order_by(order)
-            res = query.limit(num).all()
+            return query.limit(num).all()
+        return self.session_run(q)
+
+    def session_run(self, func):
+        try:
+            session = self.get_session()
+            return func(session)
         except Exception as e:
+            session.rollback()
             logger.warning("Exception: %s" % e)
         finally:
             self.close_session()
-        return res
 
     def store(self, *args, **kwds):
         def real_decorator(fn):
@@ -101,31 +105,20 @@ class Database(object):
         return real_decorator
 
     def get(self, compare_keys, item):
-        try:
-            session = self.get_session()
-            res = self._get(session, compare_keys, item)
-        except Exception as e:
-            session.rollback()
-            logger.warning("get Exception: %s" % e)
-        finally:
-            self.close_session()
-        return res
+        def q(session):
+            return self._get(session, compare_keys, item)
+        return self.session_run(q)
 
     def set(self, item, compare_keys):
-        try:
-            session = self.get_session()
+        def q(session):
             tmp = self._get(session, compare_keys, item)
             if tmp is not None:
                 return tmp
             session.add(item)
             session.commit()
             logger.debug('ADD item: %s' % item)
-        except Exception as e:
-            session.rollback()
-            logger.warning("set Exception: %s" % e)
-        finally:
-            self.close_session()
-        return item
+            return item
+        return self.session_run(q)
 
     def __call__(self): return self.store()
 

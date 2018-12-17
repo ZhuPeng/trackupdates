@@ -10,12 +10,12 @@ global:
 jobs:
 - name: 'githubtrending'
   # run every one hour at 0 minute
-  cron: '*/1|0'
+  cron: '*|*/5'
   url:
     test_target: 'examples/githubtrending'
-    target: 'https://github.com/trending{lang}?since=daily'
+    target: 'https://github.com/trending/{lang}?since=daily'
     query_parameter:
-      lang: '/python,/go,'
+      lang: 'python,go,all'
   parser: 'githubtrending'
   update:
     receiver: 'example'

@@ -3,8 +3,9 @@ import yaml
 import os
 import markdown2
 import appdash
+import logging
 from signal import signal, SIGINT, SIGTERM
-from flask import Flask, request, jsonify, logging, abort, send_from_directory
+from flask import Flask, request, jsonify, abort, send_from_directory
 logger = logging.getLogger(__file__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -84,7 +85,7 @@ class Server:
         for _signal in [SIGINT, SIGTERM]:
             signal(_signal, self.stop)
 
-        self.dash.run_server(port=port, debug=True, **options)
+        self.dash.run_server(port=port, **options)
 
     def stop(self, signal, frame):
         logger.info('Server Stopped')
