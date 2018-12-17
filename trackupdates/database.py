@@ -87,6 +87,11 @@ class Database(object):
             return query.limit(num).all()
         return self.session_run(q)
 
+    def distinct(self, item_class, column):
+        def q(session):
+            return session.query(getattr(item_class, column)).distinct().all()
+        return self.session_run(q)
+
     def session_run(self, func):
         try:
             session = self.get_session()
@@ -157,3 +162,7 @@ class Table(Database):
 
     def drop(self):
         return self.db.drop(self.item_class)
+
+    def distinct(self, col):
+        logger.info('get distinct %s from table %s', col, self.item_class.__tablename__)
+        return self.db.distinct(self.item_class, col)

@@ -9,18 +9,18 @@ global:
 
 jobs:
 - name: 'githubtrending'
-  # run every one hour at 0 minute
+  # run every 5 minute
   cron: '*|*/5'
   url:
     test_target: 'examples/githubtrending'
     target: 'https://github.com/trending/{lang}?since=daily'
     query_parameter:
-      lang: 'python,go,all'
+      lang: 
+        - type: string
+          value: all
+        - type: distinct
+          value: lang
   parser: 'githubtrending'
-  update:
-    receiver: 'example'
-    match:
-      lang: 'Python'
 
 parsers:
 - name: 'githubtrending'
@@ -31,7 +31,7 @@ parsers:
     url: 'div/h3/a/@href'
     repo: 'div/h3/a'
     desc: "div[@class='py-1']/p"
-    lang: "div/span[@itemprop='programmingLanguage']"
+    lang: "div/span/span[@itemprop='programmingLanguage']"
     star: "div/a[@aria-label='Stargazers']"
     fork: "div/a[@aria-label='Forks']"
     today: "div/span[@class='float-right']"

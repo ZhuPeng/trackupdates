@@ -150,12 +150,26 @@ class ListCrawl:
             return
 
         # TODO: Now only support one query parameter with enumerate value
-        for k, para in query.items():
-            for v in str(para).split(','):
-                d = {k: v}
-                yield self.downloader.get(self.url_format.format(**d), {})
+        for k, v in query.items(): 
+            for qp in v:
+                values_list = []
+                if qp['type']== 'string':
+                    values_list = str(qp['value']).split(',')
+                elif qp['type'] == 'distinct':
+                    table = qp.get('table', self.config['name'])
+                    col = qp['value']
+                    job = self.sched.get_job(table)
+                    for v in job.store.distinct(col):
+                        if v[0]:
+                            values_list.append(v[0])
+                for v in values_list:
+                    d = {k: v}
+                    url = self.url_format.format(**d)
+                    logger.info('Crawl content url: ' + url)
+                    yield self.downloader.get(url, {})
 
-    def run(self):
+    def run(self, sched=None):
+        self.sched = sched
         items = []
         for c in self._load_content():
             items.extend(self.parser.parse(c))
@@ -186,9 +200,9 @@ class Job:
         self.item_class = self.db.create_table_if_not_exists(tname, self.col_map.keys(), self.fmt)
         self.store = database.Table(self.db, self.item_class, ['url'])
 
-    def run(self, filterbykeyword=True):
+    def run(self, sche=None, filterbykeyword=True):
         logger.info('[%s]: job run' % self.name)
-        items = self.crawl.run()
+        items = self.crawl.run(sche)
         update = []
         for i in items:
             t = self.item_class(**i)
@@ -267,6 +281,9 @@ class Scheduler:
         self._init_job()
         self.sched.add_job(self.daily_report, 'cron', **parse_job_cron('18|30'))
 
+    def get_job(self, name):
+        return self.jobs[name]
+
     def daily_report(self):
         receivers = self.settings.get_daily_report_receivers()
         if len(receivers) == 0:
@@ -286,7 +303,7 @@ class Scheduler:
             job = Job(config, self.db, self.mailer, self.test)
             self.jobs[name] = job
             cron = parse_job_cron(config['cron'])
-            self.sched.add_job(job.run, 'cron', **cron)
+            self.sched.add_job(job.run, 'cron', [self], **cron)
 
     def run(self):
         try:
