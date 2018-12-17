@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 import database
 import server
 import random
+import thread
 logging.basicConfig()
 logger = logging.getLogger(__file__)
 
@@ -305,13 +306,17 @@ class Scheduler:
             cron = parse_job_cron(config['cron'])
             self.sched.add_job(job.run, 'cron', [self], **cron)
 
+    def first_run(self):
+        for k, job in self.jobs.items():
+            def f():
+                updates = job.run(self)
+                if self.test:
+                    print_items(updates)
+            thread.start_new_thread(f, ())
+
     def run(self):
         try:
-            if self.blocking or self.test:
-                for k, job in self.jobs.items():
-                    updates = job.run()
-                    if self.test:
-                        print_items(updates)
+            self.first_run()
             if not self.test:
                 self.sched.start()
         except (KeyboardInterrupt, SystemExit):
