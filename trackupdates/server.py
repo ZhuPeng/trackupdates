@@ -84,7 +84,7 @@ class Server:
         for _signal in [SIGINT, SIGTERM]:
             signal(_signal, self.stop)
 
-        self.dash.run_server(port=port, debug=True, **options)
+        self.dash.run_server(port=port, **options)
 
     def stop(self, signal, frame):
         logger.info('Server Stopped')
