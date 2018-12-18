@@ -152,7 +152,7 @@ class ListCrawl:
             return
 
         # TODO: Now only support one query parameter with enumerate value
-        for k, v in query.items(): 
+        for k, v in query.items():
             for qp in v:
                 values_list = []
                 if qp['type']== 'string':
@@ -309,11 +309,11 @@ class Scheduler:
 
     def first_run(self):
         for k, job in self.jobs.items():
-            def f():
-                updates = job.run(self)
+            def f(j):
+                updates = j.run(self)
                 if self.test:
                     print_items(updates)
-            thread.start_new_thread(f, ())
+            thread.start_new_thread(f, (job, ))
 
     def run(self):
         try:

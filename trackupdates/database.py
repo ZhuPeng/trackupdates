@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime
 import logging
 import os
-logger = logging
+logger = logging.getLogger(__file__)
 
 
 class Database(object):
