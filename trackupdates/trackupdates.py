@@ -21,7 +21,9 @@ import database
 import server
 import random
 import thread
+from threading import Thread
 import urllib
+from Queue import Queue
 logging.basicConfig()
 logger = logging.getLogger(__file__)
 
@@ -125,10 +127,35 @@ class Parser:
 
 class Downloader:
     def __init__(self):
-        pass
+        self.queue = Queue()
+        self.output = Queue()
+        self.thread_pool_size = 3
+        self.daemon()
+
+    def daemon(self):
+        for i in range(self.thread_pool_size):
+            t = Thread(name = 'Thread-' + str(i), target=self.thread_get, args=())
+            t.daemon = True
+            t.start()
+
+    def add(self, url, param):
+        self.queue.put((url, param))
 
     def get(self, url, param, retry=3):
+        logger.info('Crawl content url: %s, %s', url, str(param))
+        if not url.startswith('http'):
+            return utils.read_content(url)
         return utils.get_data(url, param, retry)
+
+    def thread_get(self):
+        while True:
+            url, param = self.queue.get() 
+            self.output.put(self.get(url, param))
+            self.queue.task_done()
+
+    def get_result(self):
+        while True:
+            yield self.output.get()
 
 
 class ListCrawl:
@@ -139,16 +166,16 @@ class ListCrawl:
         self.parser = Parser(self.config['parser_config'])
         self.downloader = Downloader()
 
-    def _load_content(self):
+    def gen_crawl_urls(self):
         self.url_format = self.config['url']['test_target'] if self.test else self.config['url']['target']
         logger.info('Crawl content from format: ' + self.url_format)
         if not self.url_format.startswith('http') and '{' not in self.url_format:
-            yield utils.read_content(self.url_format)
+            self.downloader.add(self.url_format, {})
             return
 
         query = self.config['url'].get('query_parameter', {})
         if len(query) == 0:
-            yield self.downloader.get(self.url_format, {})
+            self.downloader.add(self.url_format, {})
             return
 
         # TODO: Now only support one query parameter with enumerate value
@@ -173,15 +200,15 @@ class ListCrawl:
                     v = urllib.quote_plus(v)
                 d = {k: v}
                 url = self.url_format.format(**d)
-                logger.info('Crawl content url: ' + url)
-                yield self.downloader.get(url, {})
+                self.downloader.add(url, {})
 
     def run(self, sched=None):
         self.sched = sched
-        items = []
-        for c in self._load_content():
-            items.extend(self.parser.parse(c))
-        return items
+        self.gen_crawl_urls()
+
+    def get_result(self):
+        for r in self.downloader.get_result():
+            yield self.parser.parse(r)
 
 
 class Job:
@@ -200,6 +227,7 @@ class Job:
         self.col_map = config['parser_config']['attr']
         self.fmt = config['parser_config'].get('format', {})
         self._init_store()
+        thread.start_new_thread(self.daemon, ())
 
     def _init_store(self):
         tname = self.name
@@ -210,23 +238,26 @@ class Job:
 
     def run(self, sche=None, filterbykeyword=True):
         logger.info('[%s]: job run' % self.name)
-        items = self.crawl.run(sche)
-        update = []
-        for i in items:
-            t = self.item_class(**i)
-            # TODO: Need a simple and efficient method, now use attribute url
-            # for default distinguish value
-            key = t.url
-            if self.store.get(key) is None:
-                t = self.store.set(key, t)
-                update.append(t)
+        self.crawl.run(sche)
 
-        if filterbykeyword:
-            update = filter(self._filter, update)
-        logger.info('[%s]: Track updates: %d' % (self.name, len(update)))
-        if not self.test and len(update):
-            self.send_mail(update)
-        return update
+    def daemon(self, filterbykeyword=True):
+        logger.info('[%s] daemon run job', self.name)
+        for items in self.crawl.get_result():
+            update = []
+            for i in items:
+                t = self.item_class(**i)
+                # TODO: Need a simple and efficient method, now use attribute url
+                # for default distinguish value
+                key = t.url
+                if self.store.get(key) is not None:
+                    continue
+                update.append(self.store.set(key, t))
+            logger.info('[%s]: crawl new updates: %d' % (self.name, len(update)))
+            if filterbykeyword:
+                update = filter(self._filter, update)
+            if not self.test and len(update):
+                logger.info('[%s]: track notify updates: %d' % (self.name, len(update)))
+                self.send_mail(update)
 
     def _filter(self, item):
         if len(self.filter_funcs) == 0:
