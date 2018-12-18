@@ -252,6 +252,8 @@ class Job:
                 if self.store.get(key) is not None:
                     continue
                 update.append(self.store.set(key, t))
+            if len(update) == 0:
+                continue
             logger.info('[%s]: crawl new updates: %d' % (self.name, len(update)))
             if filterbykeyword:
                 update = filter(self._filter, update)
