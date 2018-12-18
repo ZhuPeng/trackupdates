@@ -142,7 +142,7 @@ class ListCrawl:
     def _load_content(self):
         self.url_format = self.config['url']['test_target'] if self.test else self.config['url']['target']
         logger.info('Crawl content from format: ' + self.url_format)
-        if not self.url_format.startswith('http'):
+        if not self.url_format.startswith('http') and '{' not in self.url_format:
             yield utils.read_content(self.url_format)
             return
 
@@ -155,8 +155,12 @@ class ListCrawl:
         for k, v in query.items():
             for qp in v:
                 values_list = []
-                if qp['type']== 'string':
-                    values_list = str(qp['value']).split(',')
+                if qp['type'] == 'string':
+                    for s in str(qp['value']).split(','):
+                        values_list.append(s)
+                elif qp['type'] == 'range':
+                    for r in range(int(qp['from']), int(qp['to'])):
+                        values_list.append(str(r))
                 elif qp['type'] == 'distinct':
                     table = qp.get('table', self.config['name'])
                     col = qp['value']
@@ -164,11 +168,13 @@ class ListCrawl:
                     for v in job.store.distinct(col):
                         if v[0]:
                             values_list.append(v[0])
-                for v in values_list:
-                    d = {k: urllib.quote_plus(v)}
-                    url = self.url_format.format(**d)
-                    logger.info('Crawl content url: ' + url)
-                    yield self.downloader.get(url, {})
+            for v in set(values_list):
+                if not v.startswith('http'):
+                    v = urllib.quote_plus(v)
+                d = {k: v}
+                url = self.url_format.format(**d)
+                logger.info('Crawl content url: ' + url)
+                yield self.downloader.get(url, {})
 
     def run(self, sched=None):
         self.sched = sched
