@@ -116,7 +116,7 @@ def gendash(server, sched):
 
         for dropdown_value in dropdown_values:
             job = jobs[dropdown_value]
-            items = sched.jobs[job].store.iter(starttime=start_date)
+            items = sched.jobs[job].store.iter(starttime=start_date, num=99999)
             data[dropdown_value] = items
         return x, data
     return app
