@@ -70,6 +70,7 @@ def gendash(server, sched):
     def callback_crawl_count(dropdown_values, start_date):
         x, dbs = db_select(dropdown_values, start_date)
         data = []
+        total = 0
         for k, items in dbs.items():
             count, y = {}, []
             for i in items:
@@ -77,8 +78,9 @@ def gendash(server, sched):
                 count[day] = count.get(day, 0) + 1
             for j in x:
                 y.append(count.get(j, 0))
+            total += sum(y)
             data.append({'x': x, 'y': y, 'type': 'line', 'name': k})
-        return {'data': data, 'layout': {'title': 'Crawl Count'}}
+        return {'data': data, 'layout': {'title': 'Crawl Count [Total: %d]' % total}}
 
     @app.callback(Output('top-count-words-graph', 'figure'), [Input('item-dropdown', 'value'), Input('date-picker-single', 'date')])
     def callback_top_words(dropdown_values, start_date):
@@ -116,7 +118,7 @@ def gendash(server, sched):
 
         for dropdown_value in dropdown_values:
             job = jobs[dropdown_value]
-            items = sched.jobs[job].store.iter(starttime=start_date, num=99999)
+            items = sched.jobs[job].store.iter(starttime=start_date, num=-1)
             data[dropdown_value] = items
         return x, data
     return app
