@@ -5,6 +5,7 @@ import lxml.html as html
 from lxml import etree
 import HTMLParser
 import markdown2
+import time
 import chardet
 import smtplib
 import string  # for tls add this line
@@ -65,6 +66,16 @@ markdown2html = deco_markdown2html(gen_markdown)
 
 
 def get_data(url, param, retry=3):
+    if param.get('withjs', False):
+        from selenium import webdriver
+        driver = webdriver.PhantomJS()
+        driver.get(url)
+        time.sleep(3)
+        return driver.page_source
+    return get_data_without_js(url, param, retry)
+
+
+def get_data_without_js(url, param, retry=3):
     result = ''
     while retry:
         retry -= 1

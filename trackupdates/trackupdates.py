@@ -149,7 +149,7 @@ class Downloader:
 
     def thread_get(self):
         while True:
-            url, param = self.queue.get() 
+            url, param = self.queue.get()
             self.output.put(self.get(url, param))
             self.queue.task_done()
 
@@ -169,19 +169,20 @@ class ListCrawl:
     def gen_crawl_urls(self):
         self.url_format = self.config['url']['test_target'] if self.test else self.config['url']['target']
         logger.info('Crawl content from format: ' + self.url_format)
+        param = {'withjs': self.config['url'].get('withjs', False)}
         if not self.url_format.startswith('http') and '{' not in self.url_format:
-            self.downloader.add(self.url_format, {})
+            self.downloader.add(self.url_format, param)
             return
 
         query = self.config['url'].get('query_parameter', {})
         if len(query) == 0:
-            self.downloader.add(self.url_format, {})
+            self.downloader.add(self.url_format, param)
             return
 
         # TODO: Now only support one query parameter with enumerate value
         for k, v in query.items():
+            values_list = []
             for qp in v:
-                values_list = []
                 if qp['type'] == 'string':
                     for s in str(qp['value']).split(','):
                         values_list.append(s)
@@ -200,7 +201,7 @@ class ListCrawl:
                     v = urllib.quote_plus(v)
                 d = {k: v}
                 url = self.url_format.format(**d)
-                self.downloader.add(url, {})
+                self.downloader.add(url, param)
 
     def run(self, sched=None):
         self.sched = sched
