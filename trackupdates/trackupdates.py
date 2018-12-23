@@ -200,7 +200,7 @@ class ListCrawl:
                 if not v.startswith('http'):
                     v = urllib.quote_plus(v)
                 d = {k: v}
-                url = self.url_format.format(**d)
+                url = unicode(self.url_format).format(**d)
                 self.downloader.add(url, param)
 
     def run(self, sched=None):
