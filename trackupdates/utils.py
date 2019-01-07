@@ -66,13 +66,16 @@ markdown2html = deco_markdown2html(gen_markdown)
 
 
 def get_data(url, param, retry=3):
-    if param.get('withjs', False):
-        from selenium import webdriver
-        driver = webdriver.PhantomJS()
-        driver.get(url)
-        time.sleep(3)
-        return driver.page_source
-    return get_data_without_js(url, param, retry)
+    p = param.copy()
+    if 'withjs' in p:
+        if p.get('withjs', False):
+            from selenium import webdriver
+            driver = webdriver.PhantomJS()
+            driver.get(url)
+            time.sleep(3)
+            return driver.page_source
+        del p['withjs']
+    return get_data_without_js(url, p, retry)
 
 
 def get_data_without_js(url, param, retry=3):
@@ -145,4 +148,4 @@ def read_content(filename):
     return decode_rawdata(rawdata)
 
 if __name__ == '__main__':
-    get_data('http://www.sge.com.cn/', {})
+    print get_data('https://github.com/trending/Vue?since=daily', {'withjs': False})
