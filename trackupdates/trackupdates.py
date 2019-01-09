@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
-  trackupdates.py <yaml> [--test] [--runjobs=<runjobs>] [--log=<level>]
+  trackupdates.py <yaml> [--test] [--runjobs=<runjobs>] [--log=<level>] [--runoneloop]
   trackupdates.py (-h | --help)
   trackupdates.py --version
 
@@ -10,6 +10,7 @@ Options:
   --version     Show version.
   --log=<level>    log level [default: INFO].
   --test        Test parse webpage content in local.
+  --runoneloop  Run only one loop.
   --runjobs=<runjobs>    Specify job name with comma, default run all jobs [default: ].
 """
 from docopt import docopt
@@ -306,10 +307,10 @@ def print_items(items):
 
 
 class Scheduler:
-    def __init__(self, config_path, blocking=True, test=False, runjobs=None):
+    def __init__(self, config_path, blocking=True, test=False, runjobs=None, runoneloop=False):
         self.settings = Settings(config_path)
         self.blocking = blocking
-        if blocking:
+        if blocking and not runoneloop:
             from apscheduler.schedulers.blocking import BlockingScheduler
             self.sched = BlockingScheduler()
         else:
@@ -378,10 +379,11 @@ def main():
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, args['--log'].upper()))
 
-    settings = Settings(args['<yaml>'])
-    sched = Scheduler(args['<yaml>'], test=args['--test'], runjobs=args['--runjobs'], blocking=False)
+    runoneloop = args['--runoneloop']
+    sched = Scheduler(args['<yaml>'], test=args['--test'], runjobs=args['--runjobs'], blocking=False, runoneloop=runoneloop)
     sched.run()
-    server.Server(sched).run()
+    if not runoneloop:
+        server.Server(sched).run()
 
 if __name__ == '__main__':
     main()
