@@ -140,7 +140,9 @@ class Downloader:
             t.start()
 
     def add(self, url, param):
+        logger.debug("pre add queue size: %d", self.queue.qsize())
         self.queue.put((url, param))
+        logger.debug("post add queue size: %d", self.queue.qsize())
 
     def get(self, url, param, retry=3):
         logger.info('Crawl content url: %s, %s', url, str(param))
@@ -150,7 +152,9 @@ class Downloader:
 
     def thread_get(self):
         while True:
+            logger.debug("pre get queue size: %d", self.queue.qsize())
             url, param = self.queue.get()
+            logger.debug("post get queue size: %d", self.queue.qsize())
             self.output.put(self.get(url, param))
             self.queue.task_done()
 
