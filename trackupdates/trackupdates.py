@@ -158,6 +158,11 @@ class Downloader:
         while True:
             yield self.output.get()
 
+    def isqueueempty(self):
+        while not self.queue.empty():
+            pass
+        logger.info("queue was empty")
+
 
 class ListCrawl:
     def __init__(self, config, test=False):
@@ -317,6 +322,7 @@ class Scheduler:
             from apscheduler.schedulers.background import BackgroundScheduler
             self.sched = BackgroundScheduler()
         self.test = test
+        self.runoneloop = runoneloop
         self.runjobs = runjobs.split(',') if type(runjobs) == str and len(runjobs) else []
         self.jobs = {}
         self.mailer = new_mailer_from_settings(self.settings)
@@ -354,7 +360,12 @@ class Scheduler:
                 updates = j.run(self)
                 if self.test:
                     print_items(updates)
-            thread.start_new_thread(f, (job, ))
+            f(job)
+
+        if self.runoneloop:
+            for k, job in self.jobs.items():
+                if job.crawl.downloader.isqueueempty():
+                    continue
 
     def run(self):
         try:
