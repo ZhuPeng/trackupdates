@@ -1,0 +1,414 @@
+global:
+  # The smarthost and SMTP sender used for mail notifications.
+  smtp_smarthost: 'host:587'
+  smtp_auth_username: 'username'
+  smtp_auth_password: 'password'
+
+  alert_receivers: 'myself'
+  daily_report_receivers: 'myself'
+  store: 'trackupdates.sqlite'
+
+jobs:
+- name: 'huihui'
+  view: 惠惠网
+  cron: '8-23|*/10'
+  url:
+    test_target: 'testdata/haitao.worthBuying'
+    target: 'http://www.huihui.cn/haitao/worthBuying?tag=ALL&page={page}'
+    query_parameter: 
+      page: 
+      - type: string
+        value: 1,2,3,4,5,6,7,8,9,10
+  parser: 'huihui'
+
+- name: doubanread
+  view: 豆瓣阅读
+  url: 
+    test_target: testdata/douban.htm
+    target: '{target_url}'
+    withjs: true
+    query_parameter:
+      target_url:
+      - type: string
+        value: https://read.douban.com/category/?kind=102
+      # TODO: with Chinese Char
+      - type: distinct
+        value: auth_url
+      - type: distinct
+        value: category_url
+      - type: distinct
+        value: category_1_url
+      - type: distinct
+        value: category_2_url
+  parser: doubanread
+
+- name: 'martcoding'
+  view: 码市
+  url:
+    test_target: 'testdata/martcoding'
+    target: 'https://mart.coding.net/projects?type=&status=5&role_type_id='
+  parser: 'martcoding'
+  update:
+    # receiver: 'myself'
+    match: 
+      title: 'python,爬虫,数据'
+
+- name: 'python'
+  view: GitHub Trending
+  cron: '10-23|*/10'
+  url:
+    test_target: 'testdata/python'
+    target: 'https://github.com/trending/{lang}?since=daily'
+    query_parameter:
+      lang:
+      - type: string
+        value: all
+      - type: distinct
+        value: lang
+  parser: 'python'
+  update:
+    # receiver: 'myself'
+
+- name: 'infoq'
+  view: InfoQ
+  url:
+    test_target: 'testdata/infoqnews'
+    target: 'http://www.infoq.com/cn/news'
+  parser: 'infoq'
+  update:
+      # receiver: 'myself'
+    match:
+      title: 'kubernetes,docker,large scale'
+
+- name: 'jianshu'
+  view: 简书
+  url:
+    test_target: 'testdata/jianshu'
+    target: '{targeturl}'
+    query_parameter:
+      targeturl:
+      - type: string
+        value: http://www.jianshu.com/
+      - type: distinct
+        value: tag_url
+      - type: distinct
+        value: auth_url
+  parser: 'jianshu'
+  update:
+     # receiver: 'myself'
+    match:
+      title: 'kubernetes,docker,large scale'
+
+- name: 'shuimujob'
+  view: 水木工作版
+  url:
+    test_target: 'testdata/shuimujob'
+    target: 'http://www.newsmth.net/nForum/board/Career_Upgrade?ajax&p={p}'
+    query_parameter: 
+      p: 
+      - type: string
+        value: 1,2,3
+  parser: 'shuimujob'
+
+- name: 'blogkubernetes'
+  view: Kubernetes Blog
+  url:
+    test_target: 'testdata/kubernetes_blog'
+    target: 'http://blog.kubernetes.io/'
+  parser: 'blogkubernetes'
+  update:
+    receiver: 'myself'
+
+- name: 'blogcoreos'
+  view: CoreOS Blog
+  url:
+    test_target: 'testdata/coreosblog'
+    target: 'https://coreos.com/blog'
+  parser: 'blogcoreos'
+  update:
+    receiver: 'myself'
+
+- name: 'hackernews'
+  view: Hacker News
+  url:
+    test_target: 'testdata/hackernews'
+    target: 'https://news.ycombinator.com/newest'
+  parser: 'hackernews'
+  update:
+      # receiver: 'myself'
+    match:
+      title: 'kubernetes,docker,large scale'
+
+- name: 'pythonbole'
+  view: 伯乐在线
+  url:
+    test_target: 'testdata/pythonbole'
+    target: 'http://python.jobbole.com/all-posts/page/{pagenum}'
+    query_parameter: 
+      pagenum: 
+      - type: range 
+        from: 1
+        to: 2
+  parser: 'pythonbole'
+  update:
+      # receiver: 'myself'
+
+- name: 'byrtopten'
+  view: 北邮人论坛十大
+  url:
+    test_target: 'testdata/topten'
+    target: 'https://bbs.byr.cn/rss/topten'
+  parser: 'byrtopten'
+  update:
+      # receiver: 'myself'
+
+- name: 'golden-price'
+  view: 黄金价格
+  url:
+    test_target: 'testdata/golden'
+    target: 'http://www.sge.com.cn/'
+  parser: 'golden-price'
+  update:
+    receiver: 'myself'
+
+- name: 'god-film'
+  view: 电影天堂
+  url:
+    test_target: 'testdata/god-film'
+    target: 'http://www.dytt8.net/'
+  parser: 'god-film'
+
+parsers:
+- name: 'huihui'
+  base_url: 'http://www.huihui.cn'
+  base_xpath: 
+  - "//div[@node-type='slideItem']"
+  - "//li[@class='item']"
+  attr:
+    url: 'h3/a/@href'
+    title: 'h3/a'
+    desc: "div[@class='price']"
+  format:
+    markdown: '[{title}]({url}), {desc}' 
+    html: '<p><a target="_blank" href="{url}">{title}</a> {desc}</p>'
+
+- name: doubanread
+  base_url: https://read.douban.com
+  base_xpath:
+  - //ul[@class='works-list']/li
+  attr:
+    url: div/div[@class='info']/h4/a/@href
+    title: div/div[@class='info']/h4/a/@title
+    img: div/div[1]/a/img/@src
+    auth: div/div[@class='info']/div[@class='author']/a/span/span 
+    auth_url: div/div[@class='info']/div[@class='author']/a/@href
+    intro: "div/div[@class='info']/div[@class='intro ']/span/span"
+    rating: div/div[@class='info']/div[@class='extra-info']/div[@class='sticky-info']/div[@class='rating']/span
+    rating_amount: div/div[@class='info']/div[@class='extra-info']/div[@class='sticky-info']/div[@class='rating']/a
+    rating_amount_url: div/div[@class='info']/div[@class='extra-info']/div[@class='sticky-info']/div[@class='rating']/a/@href
+    words: div/div[@class='info']/div[@class='extra-info']/div[@class='sticky-info']/span[2]
+    category: div/div[@class='info']/div[@class='extra-info']/div[@class='sticky-info']/a
+    category_url: div/div[@class='info']/div[@class='extra-info']/div[@class='sticky-info']/a/@href
+    category_1: div/div[@class='info']/div[@class='extra-info']/div[@class='flexible-info']/span[1]/a
+    category_1_url: div/div[@class='info']/div[@class='extra-info']/div[@class='flexible-info']/span[1]/a/@href
+    category_2: div/div[@class='info']/div[@class='extra-info']/div[@class='flexible-info']/span[2]/a
+    category_2_url: div/div[@class='info']/div[@class='extra-info']/div[@class='flexible-info']/span[2]/a/@href
+    original_price: div/div[@class='info']/span[@class='sale']/span/s[@class='original-price']
+    discount_price: div/div[@class='info']/span[@class='sale']/span/span[@class='discount-price']
+  format:
+    markdown: '[{title}]({url}) <br> 作者：[{auth}]({auth_url})， 评分：{rating}，总评分：[{rating_amount}]({rating_amount_url})，总字数：{words}，分类：[{category}]({category_url}) [{category_1}]({category_1_url}) [{category_2}]({category_2_url}) <br> 原价：{original_price}，打折：{discount_price} <br>  {intro}'
+
+- name: 'golden-price'
+  base_url: 'http://www.sge.com.cn/'
+  base_xpath: 
+  - "//div[@class='dataStatistics']"
+  attr:
+    url: 'div/span'
+    date: 'div/span'
+    sham: 'div/div/ul/li[1]/p'
+    shamp: 'div/div/ul/li[1]/span'
+    shpm: 'div/div/ul/li[2]/p'
+    shpmp: 'div/div/ul/li[2]/span'
+    users: 'div/div/ul/li[3]/p'
+    userscount: 'div/div/ul/li[3]/span'
+    user: 'div/div/ul/li[4]/p'
+    usercount: 'div/div/ul/li[4]/span'
+  format:
+    markdown: '{date}<br>{sham}: {shamp}<br>{shpm}: {shpmp}<br>{users}: {userscount}<br>{user}: {usercount}' 
+
+- name: 'god-film'
+  base_url: 'http://www.dytt8.net/'
+  base_xpath: 
+  - "//div[@class='co_content2']/ul/a"
+  - //tr/td/a[2]
+  attr:
+    url: '@href'
+    title: '.'
+  format:
+    markdown: '[{title}]({url}) , {_crawl_time}'
+
+- name: 'martcoding'
+  base_url: 'https://mart.coding.net'
+  base_xpath: 
+  - "//div[@class='item-content']"
+  attr:
+    url: 'a/@href'
+    desc: "a/figure/div[@class='description']/div"
+    title: "div/div[@class='detail']/div[@class='name']/a"
+    price: "div/div[@class='detail']/div[@class='price']/span/span" 
+    status: "div/div[@class='detail']/div[@class='price']/span/a/button"
+  format:
+    markdown: '[{status}: {title}]({url}), {price} <br> {desc}' 
+    html: '<p><a href="{url}">{status}: {title}</a> {price}, {desc}</p>'
+
+- name: 'python'
+  base_url: 'https://github.com'
+  base_xpath: 
+  - "//li[@class='col-12 d-block width-full py-4 border-bottom']"
+  attr:
+    url: 'div/h3/a/@href'
+    repo: 'div/h3/a'
+    desc: "div[@class='py-1']/p"
+    lang: "div/span/span[@itemprop='programmingLanguage']"
+    # star: "div/a[@aria-label='Stargazers']"
+    star: "div[@class='f6 text-gray mt-2']/a[1]"
+    # fork: "div/a[@aria-label='Forks']"
+    fork: "div[@class='f6 text-gray mt-2']/a[2]"
+    today: "div/span[@class='d-inline-block float-sm-right']"
+  format:
+    markdown: '[{lang}: {repo}]({url}) <br> star: {star}, fork: {fork}, today-star: {today} <br> {desc}' 
+    html: '<p><a href="{url}">{lang}: {repo}</a></p></p><p>start: {star}, fork: {fork}, today-star: {today}</p><p>{desc}</p>'
+
+- name: infoq
+  base_url: http://www.infoq.com
+  base_xpath: 
+  - //div[@class="news_type_block"]
+  attr:
+    url: h2/a/@href
+    title: h2/a/@title
+    auth: span[2]/span[1]/span/a
+    auth_url: span[2]/span[1]/span/a/@href
+    transauth: span[2]/span[2]/span/a
+    transauth_url: span[2]/span[2]/span/a/@href
+    desc: p[1]
+  format:
+    markdown: '[{title}]({url}) <br> 作者：[{auth}]({auth_url})，译者：[{transauth}]({transauth_url}) <br> {desc}'
+
+- name: 'registration'
+  base_url: 'http://www.i-tra.org'
+  base_xpath: 
+  - "//div[@class='evt']"
+  attr:
+    url: 'h2/a/@href'
+    name: 'h2/a'
+    registration: 'ul[1]/li[2]'
+    location: 'ul[2]/li[2]'
+    dateofevent: 'ul[3]/li[2]'
+    distance: 'ul[4]/li[2]'
+    heightgainloss: 'ul[5]/li[2]'
+    # below 3 attr might miss or disorder
+    endurancepoints: 'ul[6]/li[2]'
+    mountain: 'ul[7]/li[2]'
+    finishercriteria: 'ul[8]/li[2]'
+    
+- name: 'jianshu'
+  base_url: 'http://www.jianshu.com'
+  base_xpath: 
+  - "//li/div[@class='content']"
+  attr:
+    url: "a/@href"
+    title: "a[@class='title']"
+    abstract: "p[@class='abstract']"
+    tag: "div[@class='meta']/a[@class='collection-tag']"
+    tag_url: "div[@class='meta']/a[@class='collection-tag']/@href"
+    reads: "div[@class='meta']/a[2]"
+    comments: "div[@class='meta']/a[2]"
+    like: "div[@class='meta']/span[1]"
+    money: "div[@class='meta']/span[2]"
+    auth: div[@class='meta']/a[@class='nickname']
+    auth_url: div[@class='meta']/a[@class='nickname']/@href
+    shared_at: "div[@class='author']/div[@class='name']/span/@data-shared-at"
+  format:
+    markdown: '[{title}]({url}) <br> 阅读：{reads}， 评论：{comments}， 赞：{like}， 赞赏：{money}，分享： {shared_at}  ，作者： [{auth}]({auth_url})  分类： [{tag}]({tag_url})， <br>  {abstract}'
+
+- name: 'shuimujob'
+  base_url: 'http://www.newsmth.net'
+  base_xpath: 
+  - "//tbody/tr"
+  attr:
+    url: "td[@class='title_9']/a/@href"
+    title: "td[@class='title_9']/a"
+    time: "td[@class='title_10'][1]"
+    auth: "td[@class='title_12'][1]/a"
+    auth_url: "td[@class='title_12'][1]/a/@href"
+    reply_count: "td[@class='title_11 middle'][3]"
+    reply_time: "td[@class='title_10'][2]/a"
+    reply_time_url: "td[@class='title_10'][2]/a/@href"
+    reply_auth: "td[@class='title_12'][2]/a"
+    reply_auth_url: "td[@class='title_12'][2]/a/@href"
+  format:
+    markdown: '[{title}]({url}) <br> 作者：{auth}, {time}, 回复: {reply_count}'
+
+- name: 'blogkubernetes'
+  base_url: 'http://blog.kubernetes.io'
+  base_xpath: 
+  - "//ul[@class='posts']/li"
+  attr:
+    url: "a/@href"
+    title: "a"
+  format:
+    markdown: '[{title}]({url})'
+
+- name: 'blogcoreos'
+  base_url: 'https://coreos.com'
+  base_xpath: 
+  - "//div[@class='views-row']/div"
+  attr:
+    url: div/h2/a/@href
+    title: div/h2/a
+    article-author: div[@class='article-author']
+    article-date: div[@class='article-date']
+    # description: "description"
+  format:
+    markdown: '[{title}]({url}) <br> {article-date}{article-author}'
+
+- name: 'hackernews'
+  base_url: 'https://news.ycombinator.com/'
+  base_xpath: 
+  - "//tr[@class='athing']"
+  attr:
+    url: "td[@class='title']/a/@href"
+    title: "td[@class='title']/a"
+    fromsite: "td[@class='title']/span/a/span"
+    fromsite_url: "td[@class='title']/span/a/@href"
+  format:
+    markdown: '[{title}]({url}) <br> from site: [{fromsite}]({fromsite_url})'
+
+- name: 'pythonbole'
+  base_url: 'http://python.jobbole.com/'
+  base_xpath: 
+  - "//div[@class='post floated-thumb']"
+  attr:
+    url: "div[@class='post-meta']/p/a[1]/@href"
+    title: "div[@class='post-meta']/p/a[1]/@title"
+    tag: "div[@class='post-meta']/p/a[2]"
+    tag_url: "div[@class='post-meta']/p/a[2]/@href"
+  format:
+    markdown: '[{title}]({url}), 类别: [{tag}]({tag_url})'
+
+- name: 'byrtopten'
+  base_url: 'https://bbs.byr.cn'
+  base_xpath: 
+  - "//channel/item"
+  attr:
+    url: "link"
+    title: "title"
+    description: "description"
+  format:
+    markdown: '[{title}]({url}) <br> {description}'
+
+receivers:
+- name: 'myself'
+  email_configs:
+    to: 
+    - 'xxx@yyy.com'

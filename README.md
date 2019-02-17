@@ -2,18 +2,26 @@
 A simple yaml-based xpath crawler and esay tracking site updates.
 
 
+
+
 ## Getting Started
 ```
 git clone git@github.com:ZhuPeng/trackupdates.git
 cd trackupdates
 pip install -r requirements.txt
 # update the smtp mail configure to your own
-python trackupdates/trackupdates.py examples/githubtrending.yaml --test
+python trackupdates/trackupdates.py examples/githubtrending.yaml
 ```
 The above script running as the yaml configuration file specified, it will track the updates of [github trending](https://github.com/trending?since=daily) with certain `cron` time and notify the contents which match the keywords you specified.
 
+And you can visit `localhost:5000` to see the Web page.
+
+![](https://7465-test-3c9b5e-1258459492.tcb.qcloud.la/trackupdates/example.png)
+
+
+
 ## Yaml Configuration
-The yaml configuration file syntax was inspired by [Prometheus](https://github.com/prometheus/prometheus) and [Alertmanager](https://github.com/prometheus/alertmanager). This is an example configuration that track the updates of github trending and getting notification when there was a new `Python` project. The crawl results store in `github.db` with `sqlite`.
+The yaml configuration file syntax was inspired by [Prometheus](https://github.com/prometheus/prometheus) and [Alertmanager](https://github.com/prometheus/alertmanager). This is an example configuration ([examples/githubtrending.yaml](examples/githubtrending.yaml)) that track the updates of github trending and getting notification when there was a new `Python` project. The crawl results store in `github.db` with `sqlite`.
 
 ```yaml
 global:
@@ -64,5 +72,12 @@ receivers:
     - 'example@example.com'
 ```
 
+Now you can also visit a lot already configured at [examples/public.yaml](examples/public.yaml), which contains CoreOS blog, Kubernetes Blog etc.
+
+![](https://7465-test-3c9b5e-1258459492.tcb.qcloud.la/trackupdates/webui.png)
+
+
+
 ## License
+
 MIT, please see [LICENSE](LICENSE).
