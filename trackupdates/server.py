@@ -79,13 +79,13 @@ class Server:
                 items = [markdown2.markdown(i).replace('href=', 'target="_blank" href=') for i in items]
             return jsonify({'columns': columns, 'data': items, 'format': fmt})
 
-    def run(self, ip='127.0.0.1', port=5000, **options):
+    def run(self, ip='0.0.0.0', port=5000, **options):
         """Runs the application"""
 
         for _signal in [SIGINT, SIGTERM]:
             signal(_signal, self.stop)
 
-        self.dash.run_server(port=port, **options)
+        self.dash.run_server(host=ip, port=port, **options)
 
     def stop(self, signal, frame):
         logger.info('Server Stopped')

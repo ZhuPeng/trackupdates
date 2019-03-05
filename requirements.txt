@@ -9,3 +9,5 @@ dash-core-components
 dash-table
 nltk
 HTMLParser
+lxml
+sqlalchemy
