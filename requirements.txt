@@ -8,3 +8,4 @@ dash-html-components
 dash-core-components
 dash-table
 nltk
+HTMLParser

@@ -5,13 +5,6 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from flask import Flask
 from datetime import datetime as dt, timedelta
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-nltk.download('stopwords')
-nltk.download('punkt')
-STOPWORDS = stopwords.words('english')
-
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
@@ -46,6 +39,11 @@ def genlayout(options):
 
 
 def is_filter_word(w):
+    import nltk
+    from nltk.corpus import stopwords
+    nltk.download('stopwords')
+    nltk.download('punkt')
+    STOPWORDS = stopwords.words('english')
     if w not in STOPWORDS and w.isalpha():
         return True
     return False
@@ -84,6 +82,7 @@ def gendash(server, sched):
 
     @app.callback(Output('top-count-words-graph', 'figure'), [Input('item-dropdown', 'value'), Input('date-picker-single', 'date')])
     def callback_top_words(dropdown_values, start_date):
+        from nltk.tokenize import word_tokenize
         x, dbs = db_select(dropdown_values, start_date)
         data, top_words, day_words_cnt = [], {}, {}
         for i in x:
