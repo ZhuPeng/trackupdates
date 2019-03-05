@@ -1,5 +1,5 @@
 # trackupdates
-A simple yaml-based xpath crawler and esay tracking site updates.
+A simple yaml-based xpath crawler and esay tracking site updates. Visit [https://zhupeng.github.io/trackupdates/](https://zhupeng.github.io/trackupdates/)
 
 
 
@@ -72,7 +72,7 @@ receivers:
     - 'example@example.com'
 ```
 
-Now you can also visit a lot already configured at [examples/public.yaml](examples/public.yaml), which contains CoreOS blog, Kubernetes Blog etc.
+Now you can also visit a lot already configured at [examples/public.yaml](examples/public.yaml), which contains CoreOS blog, Kubernetes Blog etc. You can visti [https://zhupeng.github.io/trackupdates/](https://zhupeng.github.io/trackupdates/).
 
 ![](https://7465-test-3c9b5e-1258459492.tcb.qcloud.la/trackupdates/webui.png)
 
