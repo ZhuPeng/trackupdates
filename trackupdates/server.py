@@ -77,7 +77,7 @@ class Server:
             if fmt == 'markdown':
                 # Markdown donot support open new tab
                 items = [markdown2.markdown(i).replace('href=', 'target="_blank" href=') for i in items]
-            return jsonify({'columns': columns, 'data': items, 'format': fmt})
+            return jsonify({'columns': columns, 'data': items, 'format': fmt, 'yaml': settings.get_job(jobname)})
 
     def run(self, ip='0.0.0.0', port=5000, **options):
         """Runs the application"""
