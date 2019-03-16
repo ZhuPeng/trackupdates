@@ -368,9 +368,11 @@ parsers:
     title: div/h2/a
     article-author: div[@class='article-author']
     article-date: div[@class='article-date']
-    # description: "description"
+    article-image_url: div[@class='article-image']/img/@src
+    article-body-header: div[@class='article-body']/h3
+    article-body: div[@class='article-body']/p
   format:
-    markdown: '[{title}]({url}) <br> {article-date}{article-author}'
+    markdown: '[{title}]({url}) <br> {article-date}{article-author} <br> {article-body-header} <br> {article-body}'
 
 - name: 'hackernews'
   base_url: 'https://news.ycombinator.com/'
