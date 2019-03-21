@@ -11,7 +11,7 @@ global:
 jobs:
 - name: 'huihui'
   view: 惠惠网
-  cron: '8-23|*/10'
+  cron: '1|0'
   url:
     test_target: 'testdata/haitao.worthBuying'
     target: 'http://www.huihui.cn/haitao/worthBuying?tag=ALL&page={page}'
@@ -23,6 +23,7 @@ jobs:
 
 - name: doubanread
   view: 豆瓣阅读
+  cron: '2|0'
   url: 
     test_target: testdata/douban.htm
     target: '{target_url}'
@@ -44,6 +45,7 @@ jobs:
 
 - name: 'martcoding'
   view: 码市
+  cron: '3|0'
   url:
     test_target: 'testdata/martcoding'
     target: 'https://mart.coding.net/projects?type=&status=5&role_type_id='
@@ -55,7 +57,7 @@ jobs:
 
 - name: 'python'
   view: GitHub Trending
-  cron: '10-23|*/10'
+  cron: '*|*/10'
   url:
     test_target: 'testdata/python'
     target: 'https://github.com/trending/{lang}?since=daily'
@@ -71,6 +73,7 @@ jobs:
 
 - name: 'infoq'
   view: InfoQ
+  cron: '4|0'
   url:
     test_target: 'testdata/infoqnews'
     target: 'http://www.infoq.com/cn/news'
@@ -82,6 +85,7 @@ jobs:
 
 - name: 'jianshu'
   view: 简书
+  cron: '2|30'
   url:
     test_target: 'testdata/jianshu'
     target: '{targeturl}'
@@ -101,6 +105,7 @@ jobs:
 
 - name: 'shuimujob'
   view: 水木工作版
+  cron: '3|30'
   url:
     test_target: 'testdata/shuimujob'
     target: 'http://www.newsmth.net/nForum/board/Career_Upgrade?ajax&p={p}'
@@ -173,6 +178,7 @@ jobs:
 
 - name: 'god-film'
   view: 电影天堂
+  cron: '4|30'
   url:
     test_target: 'testdata/god-film'
     target: 'http://www.dytt8.net/'
