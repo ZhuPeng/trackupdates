@@ -55,6 +55,14 @@ jobs:
     match: 
       title: 'python,爬虫,数据'
 
+- name: 'githubblog'
+  view: GitHub Blog 
+  cron: '*|0'
+  url:
+    test_target: 'testdata/githubblog'
+    target: 'https://github.blog'
+  parser: 'githubblog'
+
 - name: 'python'
   view: GitHub Trending
   cron: '*|*/10'
@@ -266,6 +274,21 @@ parsers:
   format:
     markdown: '[{status}: {title}]({url}), {price} <br> {desc}' 
     html: '<p><a href="{url}">{status}: {title}</a> {price}, {desc}</p>'
+
+- name: 'githubblog'
+  base_url: 'https://github.blog'
+  base_xpath: 
+  - "//article[@class='post-item d-flex flex-column flex-md-row mb-8 px-sm-0']"
+  attr:
+    url: div[1]/a/@href
+    title: div[2]/h4/a
+    pubdate: div[1]/a/time/@datetime
+    article-date: div[1]/a/time
+    tag: div[2]/ul
+    article-body: div[2]/div/p
+    article-author: div[2]/a/p
+    article-author_url: div[2]/a/@href
+    article-author_image: div[2]/a/div/img/@src
 
 - name: 'python'
   base_url: 'https://github.com'
