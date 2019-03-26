@@ -255,7 +255,7 @@ class Job:
         logger.info('[%s] daemon run job', self.name)
         for items in self.crawl.get_result():
             update = []
-            for i in items:
+            for i in items[::-1]:
                 t = self.item_class(**i)
                 # TODO: Need a simple and efficient method, now use attribute url
                 # for default distinguish value
