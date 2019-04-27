@@ -76,13 +76,14 @@ class Database(object):
             return res
         return None
 
-    def last(self, item_class, order_by='_crawl_time', num=10, starttime=None, id=None):
+    def last(self, item_class, order_by='_crawl_time', num=10, starttime=None, **kws):
         def q(session):
             query = session.query(item_class)
-            if id is not None:
-                query = query.filter(getattr(item_class, 'id') == id)
             if starttime is not None:
                 query = query.filter(getattr(item_class, '_crawl_time') > starttime)
+            for k, v in kws.items():
+                if hasattr(item_class, k):
+                    query = query.filter(getattr(item_class, k) == v)
             if hasattr(item_class, order_by):
                 order = desc(getattr(item_class, order_by))
                 query = query.order_by(order)
@@ -160,8 +161,11 @@ class Table(Database):
     def iter(self, **kw):
         num = kw.get('num', 20)
         starttime = kw.get('starttime', None)
-        id = kw.get('id', None)
-        return self.db.last(self.item_class, num=num, starttime=starttime, id=id)
+        extra = {}
+        for k, v in kw.items():
+            if k not in ['num', 'starttime']:
+                extra[k] = v
+        return self.db.last(self.item_class, num=num, starttime=starttime, **extra)
 
     def drop(self):
         return self.db.drop(self.item_class)
