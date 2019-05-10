@@ -254,6 +254,9 @@ class Job:
     def daemon(self, filterbykeyword=True):
         logger.info('[%s] daemon run job', self.name)
         for items in self.crawl.get_result():
+            if self.test:
+                print_items(items)
+                continue
             update = []
             for i in items[::-1]:
                 t = self.item_class(**i)
@@ -361,9 +364,7 @@ class Scheduler:
     def first_run(self):
         for k, job in self.jobs.items():
             def f(j):
-                updates = j.run(self)
-                if self.test:
-                    print_items(updates)
+                j.run(self)
             f(job)
 
         if self.runoneloop:
