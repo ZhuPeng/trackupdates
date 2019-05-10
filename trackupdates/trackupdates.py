@@ -59,7 +59,7 @@ class Settings:
         return config
 
     def get_receivers(self, name):
-        for r in self.yml_dict['receivers']:
+        for r in self.yml_dict.get('receivers', []):
             if r['name'] == name:
                 return r['email_configs']['to']
         return []
