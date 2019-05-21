@@ -32,6 +32,8 @@ for model in app_models:
 ' > trackupdates/admin.py
 cat trackupdates/admin.py
 
+python manage.py clearsessions
+python manage.py makemigrations --empty trackupdates
 python manage.py makemigrations trackupdates
 python manage.py migrate
 python manage.py runserver 0.0.0.0:8001
