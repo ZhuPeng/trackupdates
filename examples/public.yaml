@@ -79,6 +79,13 @@ jobs:
   update:
     # receiver: 'myself'
 
+- name: 'githubrecommend'
+  view: GitHub 推荐
+  cron: '5|0'
+  url:
+    target: 'http://www.github.com/'
+  parser: 'githubrecommend'
+
 - name: 'infoq'
   view: InfoQ
   cron: '4|0'
@@ -307,6 +314,15 @@ parsers:
   format:
     markdown: '[{lang}: {repo}]({url}) <br> star: {star}, fork: {fork}, today-star: {today} <br> {desc}' 
     html: '<p><a href="{url}">{lang}: {repo}</a></p></p><p>start: {star}, fork: {fork}, today-star: {today}</p><p>{desc}</p>'
+- name: githubrecommend
+  base_url: http://www.github.com
+  base_xpath: 
+  - //div[@class="not-found-class"]
+  attr:
+    url: not-found-class
+    article-image_url: not-found-class
+    status: not-found-class
+    title: not-found-class
 
 - name: infoq
   base_url: http://www.infoq.com
