@@ -1,5 +1,5 @@
 # trackupdates
-A simple yaml-based xpath crawler and esay tracking site updates. Visit [https://zhupeng.github.io/trackupdates/](https://zhupeng.github.io/trackupdates/)
+A simple yaml-based xpath crawler framework for easy tracking site updates. Visit [https://zhupeng.github.io/trackupdates/](https://zhupeng.github.io/trackupdates/)
 
 
 
