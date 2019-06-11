@@ -1,3 +1,5 @@
+[![HitCount](http://hits.dwyl.io/ZhuPeng/trackupdates.svg)](http://hits.dwyl.io/ZhuPeng/trackupdates)
+
 # trackupdates
 A simple yaml-based xpath crawler framework for easy tracking site updates. Visit [https://zhupeng.github.io/trackupdates/](https://zhupeng.github.io/trackupdates/)
 
