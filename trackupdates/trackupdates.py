@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
-  trackupdates.py <yaml> [--test] [--runjobs=<runjobs>] [--log=<level>] [--runoneloop]
+  trackupdates.py <yaml> [--test] [--runjobs=<runjobs>] [--log=<level>] [--runoneloop] [--noserver]
   trackupdates.py (-h | --help)
   trackupdates.py --version
 
@@ -11,6 +11,7 @@ Options:
   --log=<level>    log level [default: INFO].
   --test        Test parse webpage content in local.
   --runoneloop  Run only one loop.
+  --noserver    Donot runserver
   --runjobs=<runjobs>    Specify job name with comma, default run all jobs [default: ].
 """
 from docopt import docopt
@@ -402,10 +403,12 @@ def main():
     logger.setLevel(getattr(logging, args['--log'].upper()))
 
     runoneloop = args['--runoneloop']
-    sched = Scheduler(args['<yaml>'], test=args['--test'], runjobs=args['--runjobs'], blocking=False, runoneloop=runoneloop)
+    noserver = args['--noserver']
+    sched = Scheduler(args['<yaml>'], test=args['--test'], runjobs=args['--runjobs'], blocking=False or noserver, runoneloop=runoneloop)
     sched.run()
-    if not runoneloop:
+    if not runoneloop and not noserver:
         server.Server(sched).run()
+
 
 if __name__ == '__main__':
     main()
