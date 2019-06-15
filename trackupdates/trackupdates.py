@@ -111,7 +111,11 @@ class Parser:
 
     def _parse_item(self, ele):
         d = {}
+        concat = []
         for k, v in self.config['attr'].items():
+            if '+' in v:
+                concat.append((k, v))
+                continue
             res = utils.get_xpath(ele, v)
             if hasattr(res, 'itertext'):
                 res = ' '.join([r.strip() for r in res.itertext()])
@@ -123,6 +127,8 @@ class Parser:
                 res = self.base_url.rstrip('/') + '/' + res.lstrip('/')
             d[k] = res
         d['_crawl_time'] = datetime.now()
+        for k, v in concat:
+            d[k] = eval(v, d.copy())
         return d
 
 
