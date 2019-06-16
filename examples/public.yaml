@@ -33,8 +33,8 @@ jobs:
       - type: string
         value: https://read.douban.com/category/?kind=102
       # TODO: with Chinese Char
-      - type: distinct
-        value: auth_url
+      # - type: distinct
+      #   value: auth_url
       - type: distinct
         value: category_url
       - type: distinct
@@ -216,7 +216,7 @@ parsers:
 - name: doubanread
   base_url: https://read.douban.com
   base_xpath:
-  - //ul[@class='works-list']/li
+  - //li[contains(@class, 'works-item')]
   attr:
     url: div/div[@class='info']/h4/a/@href
     title: div/div[@class='info']/h4/a/@title
