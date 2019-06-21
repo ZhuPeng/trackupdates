@@ -7,7 +7,7 @@ ls djangoadmin/
 django-admin.py startapp trackup
 
 # replace db TODO: specified db name from yaml
-sed -i "" 's/db.sqlite3/..\/webcs.db/g' djangoadmin/settings.py
+sed -i "" 's/db.sqlite3/..\/db.sqlite3/g' djangoadmin/settings.py
 
 # add trackupdates to Install apps
 sed -i "" "s/'django.contrib.staticfiles',/'django.contrib.staticfiles', 'trackup',/g" djangoadmin/settings.py
