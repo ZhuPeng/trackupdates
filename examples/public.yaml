@@ -110,8 +110,8 @@ jobs:
         value: http://www.jianshu.com/
       - type: distinct
         value: tag_url
-      - type: distinct
-        value: auth_url
+      # - type: distinct
+      #   value: auth_url
   parser: 'jianshu'
   update:
      # receiver: 'myself'
