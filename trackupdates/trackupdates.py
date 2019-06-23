@@ -186,7 +186,9 @@ class ListCrawl:
     def gen_crawl_urls(self):
         self.url_format = self.config['url']['test_target'] if self.test else self.config['url']['target']
         logger.info('Crawl content from format: ' + self.url_format)
-        param = {'withjs': self.config['url'].get('withjs', False)}
+        param = self.config['url'].get('post_body', {})
+        param['withjs'] = self.config['url'].get('withjs', False)
+        param['init_cookies'] = self.config['url'].get('init_cookies', {})
         if not self.url_format.startswith('http') and '{' not in self.url_format:
             self.downloader.add(self.url_format, param)
             return

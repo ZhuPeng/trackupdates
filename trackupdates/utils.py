@@ -8,6 +8,9 @@ import markdown2
 import time
 import chardet
 import smtplib
+import requests
+import time
+import json
 import string  # for tls add this line
 from email.mime.text import MIMEText
 from email.header import Header
@@ -65,12 +68,32 @@ def gen_markdown(items):
 markdown2html = deco_markdown2html(gen_markdown)
 
 
+def ajax(url, p):
+    request = requests.Session()
+    from selenium import webdriver
+    driver = webdriver.PhantomJS()
+    driver.get(p['init_cookies']['url'])
+    time.sleep(3)
+    cookies = driver.get_cookies()
+    for cookie in cookies:
+        request.cookies.set(cookie['name'], cookie['value'])
+
+    for l in driver.get_log('har'):
+        har = json.loads(l['message'])
+        for e in har['log']['entries']:
+            for h in e['request']['headers']:
+                request.headers.update({h['name']: h['value']})
+    res = request.post(url, data=p).json()
+    print res
+    return ''
+
+
 def get_data(url, param, retry=3):
     p = param.copy()
-    if 'withjs' in p:
-        if p.get('withjs', False):
-            return get_data_with_js(url)
-        del p['withjs']
+    if p.get('withjs', False):
+        return get_data_with_js(url)
+    if len(p.get('init_cookies', {})) > 0:
+        return ajax(url, param)
     return get_data_without_js(url, p, retry)
 
 
@@ -96,10 +119,7 @@ def get_data_without_js(url, param, retry=3):
         try:
             opener = urllib2.build_opener()
             opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-            if len(param) != 0:
-                f = opener.open(url, urllib.urlencode(param), 120)
-            else:
-                f = opener.open(url, None, 120)
+            f = opener.open(url, None, 120)
 
             rawdata = f.read()
             result = decode_rawdata(rawdata)
