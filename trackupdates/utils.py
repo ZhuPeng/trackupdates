@@ -69,13 +69,24 @@ def get_data(url, param, retry=3):
     p = param.copy()
     if 'withjs' in p:
         if p.get('withjs', False):
-            from selenium import webdriver
-            driver = webdriver.PhantomJS()
-            driver.get(url)
-            time.sleep(3)
-            return driver.page_source
+            return get_data_with_js(url)
         del p['withjs']
     return get_data_without_js(url, p, retry)
+
+
+def get_data_with_js(url):
+    res = ''
+    try:
+        from selenium import webdriver
+        driver = webdriver.PhantomJS()
+        driver.get(url)
+        time.sleep(3)
+        res = driver.page_source
+    except Exception as e:
+        print 'get_data_with_js(%s) Exception: %s' % (url, e)
+    finally:
+        driver.quit()
+    return res
 
 
 def get_data_without_js(url, param, retry=3):
