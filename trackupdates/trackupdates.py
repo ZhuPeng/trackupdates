@@ -106,7 +106,7 @@ class Parser:
         dom = utils.transfer2dom(content)
         base_xpath = self.config['base_xpath']
         for bx in base_xpath:
-            for ele in dom.xpath(bx):
+            for ele in dom.xpath(bx.lower()):
                 items.append(self._parse_item(ele))
         return items
 
@@ -117,7 +117,7 @@ class Parser:
             if '+' in v:
                 concat.append((k, v))
                 continue
-            res = utils.get_xpath(ele, v)
+            res = utils.get_xpath(ele, v.lower())
             if hasattr(res, 'itertext'):
                 res = ' '.join([r.strip() for r in res.itertext()])
             elif hasattr(res, 'text'):
@@ -183,6 +183,24 @@ class ListCrawl:
         self.parser = Parser(self.config['parser_config'])
         self.downloader = Downloader()
 
+    def gen_value_set(self, parm_var):
+        values_list = []
+        for qp in parm_var:
+            if qp['type'] == 'string':
+                for s in str(qp['value']).split(','):
+                    values_list.append(s)
+            elif qp['type'] == 'range':
+                for r in range(int(qp['from']), int(qp['to'])):
+                    values_list.append(str(r))
+            elif qp['type'] == 'distinct':
+                table = qp.get('table', self.config['name'])
+                col = qp['value']
+                job = self.sched.get_job(table)
+                for v in job.store.distinct(col):
+                    if v[0]:
+                        values_list.append(v[0])
+        return set(values_list)
+
     def gen_crawl_urls(self):
         self.url_format = self.config['url']['test_target'] if self.test else self.config['url']['target']
         logger.info('Crawl content from format: ' + self.url_format)
@@ -193,6 +211,13 @@ class ListCrawl:
             self.downloader.add(self.url_format, param)
             return
 
+        for k, v in self.config['url'].get('post_body_parameter', {}).items():
+            values_set = self.gen_value_set(v)
+            tmp = param.copy()
+            for vs in values_set:
+                tmp[k] = vs
+                self.downloader.add(self.url_format, tmp.copy())
+
         query = self.config['url'].get('query_parameter', {})
         if len(query) == 0:
             self.downloader.add(self.url_format, param)
@@ -200,25 +225,11 @@ class ListCrawl:
 
         # TODO: Now only support one query parameter with enumerate value
         for k, v in query.items():
-            values_list = []
-            for qp in v:
-                if qp['type'] == 'string':
-                    for s in str(qp['value']).split(','):
-                        values_list.append(s)
-                elif qp['type'] == 'range':
-                    for r in range(int(qp['from']), int(qp['to'])):
-                        values_list.append(str(r))
-                elif qp['type'] == 'distinct':
-                    table = qp.get('table', self.config['name'])
-                    col = qp['value']
-                    job = self.sched.get_job(table)
-                    for v in job.store.distinct(col):
-                        if v[0]:
-                            values_list.append(v[0])
-            for v in set(values_list):
-                if not v.startswith('http'):
-                    v = urllib.quote_plus(v)
-                d = {k: v}
+            values_set = self.gen_value_set(v)
+            for vs in values_set:
+                if not vs.startswith('http'):
+                    vs = urllib.quote_plus(vs)
+                d = {k: vs}
                 url = unicode(self.url_format).format(**d)
                 self.downloader.add(url, param)
 

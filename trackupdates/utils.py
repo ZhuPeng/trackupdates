@@ -1,4 +1,4 @@
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 import urllib2
 import urllib
 import lxml.html as html
@@ -84,8 +84,8 @@ def ajax(url, p):
             for h in e['request']['headers']:
                 request.headers.update({h['name']: h['value']})
     res = request.post(url, data=p).json()
-    print res
-    return ''
+    import xmltodict
+    return xmltodict.unparse({'json': res})
 
 
 def get_data(url, param, retry=3):
