@@ -84,6 +84,7 @@ def ajax(url, p):
             for h in e['request']['headers']:
                 request.headers.update({h['name']: h['value']})
     res = request.post(url, data=p).json()
+    driver.quit()
     import xmltodict
     return xmltodict.unparse({'json': res})
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
-  trackupdates.py <yaml> [--test] [--runjobs=<runjobs>] [--log=<level>] [--runoneloop] [--noserver]
+  trackupdates.py <yaml> [--test] [--runjobs=<runjobs>] [--log=<level>] [--runoneloop] [--noserver] [--threadcount=<threadcount>]
   trackupdates.py (-h | --help)
   trackupdates.py --version
 
@@ -12,6 +12,7 @@ Options:
   --test        Test parse webpage content in local.
   --runoneloop  Run only one loop.
   --noserver    Donot runserver
+  --threadcount Thread Count for downloader, defalut 3.
   --runjobs=<runjobs>    Specify job name with comma, default run all jobs [default: ].
 """
 from docopt import docopt
@@ -28,6 +29,7 @@ import urllib
 from Queue import Queue
 logging.basicConfig()
 logger = logging.getLogger(__file__)
+ThreadCount = 3
 
 
 class Settings:
@@ -137,11 +139,11 @@ class Downloader:
     def __init__(self):
         self.queue = Queue()
         self.output = Queue()
-        self.thread_pool_size = 3
+        # self.thread_pool_size = 3
         self.daemon()
 
     def daemon(self):
-        for i in range(self.thread_pool_size):
+        for i in range(ThreadCount):
             t = Thread(name = 'Thread-' + str(i), target=self.thread_get, args=())
             t.daemon = True
             t.start()
@@ -414,6 +416,10 @@ def main():
     args = docopt(__doc__, version=__version__)
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, args['--log'].upper()))
+    if '--threadcount' in args and args['--threadcount'].isdigit():
+        global ThreadCount
+        ThreadCount = int(args['--threadcount'])
+        logger.info('Set Thread Count: %d' % ThreadCount)
 
     runoneloop = args['--runoneloop']
     noserver = args['--noserver']
