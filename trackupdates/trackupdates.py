@@ -416,7 +416,7 @@ def main():
     args = docopt(__doc__, version=__version__)
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, args['--log'].upper()))
-    if '--threadcount' in args and args['--threadcount'].isdigit():
+    if '--threadcount' in args and args['--threadcount'] is not None and args['--threadcount'].isdigit():
         global ThreadCount
         ThreadCount = int(args['--threadcount'])
         logger.info('Set Thread Count: %d' % ThreadCount)
