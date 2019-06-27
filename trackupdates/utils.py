@@ -91,11 +91,14 @@ def ajax(url, p):
 
 def get_data(url, param, retry=3):
     p = param.copy()
+    res = ''
     if p.get('withjs', False):
-        return get_data_with_js(url)
+        res = get_data_with_js(url)
     if len(p.get('init_cookies', {})) > 0:
-        return ajax(url, param)
-    return get_data_without_js(url, p, retry)
+        res = ajax(url, param)
+    res = get_data_without_js(url, p, retry)
+    # print "%s result => %s" % (url, res)
+    return res
 
 
 def get_data_with_js(url):

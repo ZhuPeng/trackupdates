@@ -108,8 +108,9 @@ class Parser:
         dom = utils.transfer2dom(content)
         base_xpath = self.config['base_xpath']
         for bx in base_xpath:
-            for ele in dom.xpath(bx.lower()):
+            for ele in dom.xpath(bx):
                 items.append(self._parse_item(ele))
+        logger.debug("parsed items: %d %s", len(items), items)
         return items
 
     def _parse_item(self, ele):
