@@ -11,3 +11,4 @@ nltk
 HTMLParser
 lxml
 sqlalchemy
+xmltodict
