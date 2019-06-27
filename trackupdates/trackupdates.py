@@ -120,7 +120,7 @@ class Parser:
             if '+' in v:
                 concat.append((k, v))
                 continue
-            res = utils.get_xpath(ele, v.lower())
+            res = utils.get_xpath(ele, v)
             if hasattr(res, 'itertext'):
                 res = ' '.join([r.strip() for r in res.itertext()])
             elif hasattr(res, 'text'):
