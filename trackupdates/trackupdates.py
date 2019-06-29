@@ -209,7 +209,7 @@ class ListCrawl:
 
     def gen_crawl_urls(self):
         self.url_format = self.config['url']['test_target'] if self.test else self.config['url']['target']
-        logger.info('Crawl content from format: ' + self.url_format)
+        logger.info('[%s] format: %s', self.config['name'], self.url_format)
         param = self.config['url'].get('post_body', {})
         param['withjs'] = self.config['url'].get('withjs', False)
         param['init_cookies'] = self.config['url'].get('init_cookies', {})
@@ -225,6 +225,8 @@ class ListCrawl:
 
         combine = list(itertools.product(*values_sets))
         for c in combine:
+            if len(c) == 0:
+                continue
             p = param.copy()
             for idx, k in enumerate(keys):
                 p[k] = c[idx]
@@ -273,7 +275,7 @@ class Job:
         thread.start_new_thread(self.daemon, ())
 
     def _init_store(self):
-        tname = self.name
+        tname = self.config['parser_config']['name']
         if self.test:
             tname = 'test_' + self.name
         self.item_class = self.db.create_table_if_not_exists(tname, self.col_map.keys(), self.fmt)

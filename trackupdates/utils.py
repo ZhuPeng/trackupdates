@@ -16,6 +16,8 @@ import string  # for tls add this line
 from email.mime.text import MIMEText
 from email.header import Header
 import threading
+import logging
+logger = logging.getLogger(__file__)
 LOCK = threading.Lock()
 SESSION = {}
 
@@ -105,7 +107,7 @@ markdown2html = deco_markdown2html(gen_markdown)
 def ajax(url, p):
     request = get_session_request(p['init_cookies']['url'])
     res = request.post(url, data=p)
-    # print url, res.content
+    logger.debug("crawl content: %s (%s) => %s", url, p, res.content)
     res = res.json()
     x = xmltodict.unparse({'json': res})
     # print 'xml:', x.encode('utf-8')
