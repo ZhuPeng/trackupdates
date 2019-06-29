@@ -10,6 +10,7 @@ import chardet
 import smtplib
 import requests
 import time
+import xmltodict
 import json
 import string  # for tls add this line
 from email.mime.text import MIMEText
@@ -83,22 +84,26 @@ def ajax(url, p):
         for e in har['log']['entries']:
             for h in e['request']['headers']:
                 request.headers.update({h['name']: h['value']})
-    res = request.post(url, data=p).json()
     driver.quit()
-    import xmltodict
+    res = request.post(url, data=p)
+    res = res.json()
     return xmltodict.unparse({'json': res})
 
 
 def get_data(url, param, retry=3):
-    p = param.copy()
-    res = ''
-    if p.get('withjs', False):
-        res = get_data_with_js(url)
-    if len(p.get('init_cookies', {})) > 0:
-        res = ajax(url, param)
-    res = get_data_without_js(url, p, retry)
-    # print "%s result => %s" % (url, res)
-    return res
+    try:
+        p = param.copy()
+        res = ''
+        if p.get('withjs', False):
+            res = get_data_with_js(url)
+        if len(p.get('init_cookies', {})) > 0:
+            res = ajax(url, param)
+        res = get_data_without_js(url, p, retry)
+        # print "%s result => %s" % (url, res)
+        return res
+    except Exception as e:
+        print 'get_data(%s) Exception: %s' % (url, e)
+    return ''
 
 
 def get_data_with_js(url):

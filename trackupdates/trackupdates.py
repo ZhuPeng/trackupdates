@@ -26,6 +26,7 @@ import random
 import thread
 from threading import Thread
 import urllib
+import itertools
 from Queue import Queue
 logging.basicConfig()
 logger = logging.getLogger(__file__)
@@ -105,12 +106,13 @@ class Parser:
 
     def parse(self, content):
         items = []
+        logger.debug("[%s] parsed content: %s", self.config['name'], content)
         dom = utils.transfer2dom(content)
         base_xpath = self.config['base_xpath']
         for bx in base_xpath:
             for ele in dom.xpath(bx):
                 items.append(self._parse_item(ele))
-        logger.debug("parsed items: %d %s", len(items), items)
+        logger.debug("[%s] parsed items: %d %s", self.config['name'], len(items), items)
         return items
 
     def _parse_item(self, ele):
@@ -133,6 +135,7 @@ class Parser:
         d['_crawl_time'] = datetime.now()
         for k, v in concat:
             d[k] = eval(v, d.copy())
+        logger.debug("[%s] parsed item: %s", self.config['name'], d)
         return d
 
 
@@ -214,12 +217,18 @@ class ListCrawl:
             self.downloader.add(self.url_format, param)
             return
 
+        values_sets = []
+        keys = []
         for k, v in self.config['url'].get('post_body_parameter', {}).items():
-            values_set = self.gen_value_set(v)
-            tmp = param.copy()
-            for vs in values_set:
-                tmp[k] = vs
-                self.downloader.add(self.url_format, tmp.copy())
+            keys.append(k)
+            values_sets.append(self.gen_value_set(v))
+
+        combine = list(itertools.product(*values_sets))
+        for c in combine:
+            p = param.copy()
+            for idx, k in enumerate(keys):
+                p[k] = c[idx]
+            self.downloader.add(self.url_format, p.copy())
 
         query = self.config['url'].get('query_parameter', {})
         if len(query) == 0:
