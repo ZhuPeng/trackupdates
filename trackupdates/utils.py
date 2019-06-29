@@ -119,7 +119,7 @@ def get_data(url, param, retry=3):
         if p.get('withjs', False):
             res = get_data_with_js(url)
         elif len(p.get('init_cookies', {})) > 0:
-            res = ajax(url, param)
+            res = ajax(url, p)
         else:
             res = get_data_without_js(url, p, retry)
         # print "%s result => %s" % (url, res)
