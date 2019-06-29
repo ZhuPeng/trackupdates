@@ -15,6 +15,39 @@ import json
 import string  # for tls add this line
 from email.mime.text import MIMEText
 from email.header import Header
+import threading
+LOCK = threading.Lock()
+SESSION = {}
+
+
+def get_session_request(url):
+    LOCK.acquire()
+    request = None
+    if url not in SESSION:
+        request = requests.Session()
+        from selenium import webdriver
+        driver = webdriver.PhantomJS()
+
+        driver.get(url)
+        time.sleep(3)
+        cookies = driver.get_cookies()
+        for cookie in cookies:
+            request.cookies.set(cookie['name'], cookie['value'])
+
+        for l in driver.get_log('har'):
+            har = json.loads(l['message'])
+            for e in har['log']['entries']:
+                for h in e['request']['headers']:
+                    request.headers.update({h['name']: h['value']})
+        request.headers.update({'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'})
+        print 'request cookies: ' + str(request.cookies)
+        print 'request headers: ' + str(request.headers)
+        driver.quit()
+        SESSION[url] = request
+    else:
+        request = SESSION[url]
+    LOCK.release()
+    return request
 
 
 class Email():
@@ -70,24 +103,13 @@ markdown2html = deco_markdown2html(gen_markdown)
 
 
 def ajax(url, p):
-    request = requests.Session()
-    from selenium import webdriver
-    driver = webdriver.PhantomJS()
-    driver.get(p['init_cookies']['url'])
-    time.sleep(3)
-    cookies = driver.get_cookies()
-    for cookie in cookies:
-        request.cookies.set(cookie['name'], cookie['value'])
-
-    for l in driver.get_log('har'):
-        har = json.loads(l['message'])
-        for e in har['log']['entries']:
-            for h in e['request']['headers']:
-                request.headers.update({h['name']: h['value']})
-    driver.quit()
+    request = get_session_request(p['init_cookies']['url'])
     res = request.post(url, data=p)
+    # print url, res.content
     res = res.json()
-    return xmltodict.unparse({'json': res})
+    x = xmltodict.unparse({'json': res})
+    # print 'xml:', x.encode('utf-8')
+    return x
 
 
 def get_data(url, param, retry=3):
@@ -96,9 +118,10 @@ def get_data(url, param, retry=3):
         res = ''
         if p.get('withjs', False):
             res = get_data_with_js(url)
-        if len(p.get('init_cookies', {})) > 0:
+        elif len(p.get('init_cookies', {})) > 0:
             res = ajax(url, param)
-        res = get_data_without_js(url, p, retry)
+        else:
+            res = get_data_without_js(url, p, retry)
         # print "%s result => %s" % (url, res)
         return res
     except Exception as e:
