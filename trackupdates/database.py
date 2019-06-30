@@ -117,6 +117,13 @@ class Database(object):
             return self._get(session, compare_keys, item)
         return self.session_run(q)
 
+    def query(self, sql):
+        def q(session):
+            cursor = session.execute(sql)
+            result = cursor.fetchall()
+            return result
+        return self.session_run(q)
+
     def set(self, item, compare_keys):
         def q(session):
             tmp = self._get(session, compare_keys, item)

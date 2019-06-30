@@ -198,6 +198,13 @@ class ListCrawl:
             elif qp['type'] == 'range':
                 for r in range(int(qp['from']), int(qp['to'])):
                     values_list.append(str(r))
+            elif qp['type'] == 'query':
+                if 'sql' in qp:
+                    values = self.sched.db.query(qp['sql'])
+                    logger.debug("[query sql %s] values: %s", qp['sql'], values)
+                    for v in values:
+                        if v[0]:
+                            values_list.append(v[0])
             elif qp['type'] == 'distinct':
                 table = qp.get('table', self.config['name'])
                 col = qp['value']
