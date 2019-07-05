@@ -72,7 +72,7 @@ jobs:
     query_parameter:
       lang:
       - type: string
-        value: all
+        value: '' 
       - type: distinct
         value: lang
   parser: 'python'
