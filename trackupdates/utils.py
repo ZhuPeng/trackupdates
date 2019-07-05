@@ -133,6 +133,7 @@ def get_data(url, param, retry=3):
 
 def get_data_with_js(url):
     res = ''
+    driver = None
     try:
         from selenium import webdriver
         driver = webdriver.PhantomJS()
