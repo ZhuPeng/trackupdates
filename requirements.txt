@@ -3,6 +3,7 @@ markdown2
 pyyaml
 chardet
 docopt
+pytest==2.5.0
 dash
 dash-html-components
 dash-core-components
