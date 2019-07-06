@@ -11,7 +11,10 @@ logger = logging.getLogger(__file__)
 
 class Database(object):
     def __init__(self, name):
-        target = 'sqlite:///%s/%s' % (os.getcwd(), name)
+        if 'mysql' in name:
+            target = name
+        else:
+            target = 'sqlite:///%s/%s' % (os.getcwd(), name)
         self.engine = create_engine(target, echo=False)
         self._session = scoped_session(sessionmaker(bind=self.engine))
         self.base = declarative_base()
