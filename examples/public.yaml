@@ -100,7 +100,7 @@ jobs:
 
 - name: 'jianshu'
   view: 简书
-  cron: '2|30'
+  cron: '*|*/15'
   url:
     test_target: 'testdata/jianshu'
     target: '{targeturl}'
