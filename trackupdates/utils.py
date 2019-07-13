@@ -20,6 +20,7 @@ import logging
 logger = logging.getLogger(__file__)
 LOCK = threading.Lock()
 SESSION = {}
+NOT_INCLUDE = set(['Origin', 'Content-Length', 'Connection', 'Content-Type'])
 
 
 def get_session_request(url):
@@ -40,6 +41,8 @@ def get_session_request(url):
             har = json.loads(l['message'])
             for e in har['log']['entries']:
                 for h in e['request']['headers']:
+                    if h['name'] in NOT_INCLUDE:
+                        continue
                     request.headers.update({h['name']: h['value']})
         request.headers.update({'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'})
         print 'request cookies: ' + str(request.cookies)
