@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
-  trackupdates.py <yaml> [--test] [--runjobs=<runjobs>] [--log=<level>] [--runoneloop] [--noserver] [--threadcount=<threadcount>]
+  trackupdates.py <yaml> [--test] [--runjobs=<runjobs>] [--log=<level>] [--runoneloop] [--noserver] [--threadcount=<threadcount>] [--firstrunall]
   trackupdates.py (-h | --help)
   trackupdates.py --version
 
@@ -11,6 +11,7 @@ Options:
   --log=<level>    log level [default: INFO].
   --test        Test parse webpage content in local.
   --runoneloop  Run only one loop.
+  --firstrunall  Run all jobs in init run.
   --noserver    Donot runserver
   --threadcount Thread Count for downloader, defalut 3.
   --runjobs=<runjobs>    Specify job name with comma, default run all jobs [default: ].
@@ -360,7 +361,7 @@ def print_items(items):
 
 
 class Scheduler:
-    def __init__(self, config_path, blocking=True, test=False, runjobs=None, runoneloop=False):
+    def __init__(self, config_path, blocking=True, test=False, runjobs=None, runoneloop=False, first_run_all=False):
         self.settings = Settings(config_path)
         self.blocking = blocking
         if blocking and not runoneloop:
@@ -371,6 +372,7 @@ class Scheduler:
             self.sched = BackgroundScheduler()
         self.test = test
         self.runoneloop = runoneloop
+        self.first_run_all = first_run_all
         self.runjobs = runjobs.split(',') if type(runjobs) == str and len(runjobs) else []
         self.jobs = {}
         self.mailer = new_mailer_from_settings(self.settings)
@@ -403,10 +405,11 @@ class Scheduler:
             self.sched.add_job(job.run, 'cron', [self], **cron)
 
     def first_run(self):
-        for k, job in self.jobs.items():
-            def f(j):
-                j.run(self)
-            f(job)
+        if self.first_run_all:
+            for k, job in self.jobs.items():
+                def f(j):
+                    j.run(self)
+                f(job)
 
         if self.runoneloop:
             for k, job in self.jobs.items():
@@ -442,7 +445,8 @@ def main():
 
     runoneloop = args['--runoneloop']
     noserver = args['--noserver']
-    sched = Scheduler(args['<yaml>'], test=args['--test'], runjobs=args['--runjobs'], blocking=False or noserver, runoneloop=runoneloop)
+    first_run_all = args['--firstrunall']
+    sched = Scheduler(args['<yaml>'], test=args['--test'], runjobs=args['--runjobs'], blocking=False or noserver, runoneloop=runoneloop, first_run_all=first_run_all)
     sched.run()
     if not runoneloop and not noserver:
         server.Server(sched).run()
