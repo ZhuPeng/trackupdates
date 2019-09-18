@@ -13,3 +13,4 @@ HTMLParser
 lxml
 sqlalchemy
 xmltodict
+feedparser

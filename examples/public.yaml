@@ -63,6 +63,16 @@ jobs:
     target: 'https://github.blog'
   parser: 'githubblog'
 
+- name: 'cncfblog'
+  view: CNCF Blog 
+  cron: '4|10'
+  url:
+    type: rss
+    test_target: 'testdata/cncfblog'
+    target: https://www.cncf.io/feed/
+  parser: 'cncfblog'
+
+
 - name: 'python'
   view: GitHub Trending
   cron: '*|*/10'
@@ -296,6 +306,21 @@ parsers:
     article-author: div[2]/a/p
     article-author_url: div[2]/a/@href
     article-author_image: div[2]/a/div/img/@src
+
+- name: 'cncfblog'
+  base_url: 'https://www.cncf.io/author'
+  base_xpath: 
+  - //entries
+  attr:
+    url: links/href
+    title: title
+    pubdate: published
+    article-date: published
+    tag: tags/term
+    article-body: content/value
+    article-author: author
+    article-author_url: author
+    article-author_image: author
 
 - name: 'python'
   base_url: 'https://github.com'

@@ -219,6 +219,7 @@ class ListCrawl:
         self.url_format = self.config['url']['test_target'] if self.test else self.config['url']['target']
         logger.info('[%s] format: %s', self.config['name'], self.url_format)
         param = self.config['url'].get('post_body', {})
+        param['type'] = self.config['url'].get('type', '')
         param['withjs'] = self.config['url'].get('withjs', False)
         param['init_cookies'] = self.config['url'].get('init_cookies', {})
         if not self.url_format.startswith('http') and '{' not in self.url_format:

@@ -107,14 +107,23 @@ def gen_markdown(items):
 markdown2html = deco_markdown2html(gen_markdown)
 
 
+def json2xml(j):
+    x = xmltodict.unparse({'json': j})
+    # print 'xml:', x.encode('utf-8')
+    return x
+
+
 def ajax(url, p):
     request = get_session_request(p['init_cookies']['url'])
     res = request.post(url, data=p)
     logger.debug("crawl content: %s (%s) => %s", url, p, res.content)
-    res = res.json()
-    x = xmltodict.unparse({'json': res})
-    # print 'xml:', x.encode('utf-8')
-    return x
+    return json2xml(res.json())
+
+
+def get_rss(url):
+    import feedparser
+    feed = feedparser.parse(url)
+    return json2xml(dict(feed))
 
 
 def get_data(url, param, retry=3):
@@ -125,6 +134,8 @@ def get_data(url, param, retry=3):
             res = get_data_with_js(url)
         elif len(p.get('init_cookies', {})) > 0:
             res = ajax(url, p)
+        elif p.get('type') == 'rss':
+            res = get_rss(url)
         else:
             res = get_data_without_js(url, p, retry)
         # print "%s result => %s" % (url, res)
