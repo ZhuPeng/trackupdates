@@ -129,7 +129,7 @@ class Parser:
                 v = v[:-len('/@RAW')]
             res = utils.get_xpath(ele, v)
             if raw:
-                res = utils.tree2html(res)
+                res = utils.tree2md(res)
             elif hasattr(res, 'itertext'):
                 res = ' '.join([r.strip() for r in res.itertext()])
             elif hasattr(res, 'text'):

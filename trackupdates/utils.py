@@ -16,6 +16,7 @@ import string  # for tls add this line
 from email.mime.text import MIMEText
 from email.header import Header
 import threading
+import tomd
 import logging
 logger = logging.getLogger(__file__)
 LOCK = threading.Lock()
@@ -189,6 +190,12 @@ def getinnerhtml(data):
 def tree2html(node):
     html_data = etree.tostring(node, pretty_print=True)
     return getinnerhtml(html_data.decode('utf-8'))
+
+
+def tree2md(node):
+    h = tree2html(node)
+    m = tomd.Tomd(h).markdown
+    return m
 
 
 def get_xpath(ele, path, idx=0):
