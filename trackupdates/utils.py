@@ -109,7 +109,7 @@ markdown2html = deco_markdown2html(gen_markdown)
 
 def json2xml(j):
     x = xmltodict.unparse({'json': j})
-    print 'xml:', x.encode('utf-8')
+    logger.debug('json2xml: %s', x.encode('utf-8'))
     return x
 
 
