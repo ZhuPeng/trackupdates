@@ -143,11 +143,10 @@ jobs:
 - name: 'blogkubernetes'
   view: Kubernetes Blog
   url:
+    type: rss
     test_target: 'testdata/kubernetes_blog'
-    target: 'http://blog.kubernetes.io/'
+    target: https://kubernetes.io/feed.xml
   parser: 'blogkubernetes'
-  update:
-    receiver: 'myself'
 
 - name: 'blogcoreos'
   view: CoreOS Blog
@@ -317,7 +316,7 @@ parsers:
     pubdate: published
     article-date: published
     tag: tags/term
-    article-body: content/value
+    article-body: content/value/@RAW
     article-author: author
     article-author_url: author
     article-author_image: author
@@ -422,12 +421,17 @@ parsers:
 - name: 'blogkubernetes'
   base_url: 'http://blog.kubernetes.io'
   base_xpath: 
-  - "//ul[@class='posts']/li"
+  - //entries
   attr:
-    url: "a/@href"
-    title: "a"
-  format:
-    markdown: '[{title}]({url})'
+    url: links/href
+    title: title
+    pubdate: published
+    article-date: published
+    tag: tags/term
+    article-body: summary/@RAW
+    article-author: author
+    article-author_url: author
+    article-author_image: author
 
 - name: 'blogcoreos'
   base_url: 'https://coreos.com'

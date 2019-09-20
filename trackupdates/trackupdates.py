@@ -111,7 +111,7 @@ class Parser:
         dom = utils.transfer2dom(content)
         base_xpath = self.config['base_xpath']
         for bx in base_xpath:
-            for ele in dom.xpath(bx):
+            for ele in dom.xpath(bx)[::-1]:
                 items.append(self._parse_item(ele))
         logger.debug("[%s] parsed items: %d %s", self.config['name'], len(items), items)
         return items
@@ -123,8 +123,14 @@ class Parser:
             if '+' in v:
                 concat.append((k, v))
                 continue
+            raw = False
+            if v.endswith('/@RAW'):
+                raw = True
+                v = v[:-len('/@RAW')]
             res = utils.get_xpath(ele, v)
-            if hasattr(res, 'itertext'):
+            if raw:
+                res = utils.tree2html(res)
+            elif hasattr(res, 'itertext'):
                 res = ' '.join([r.strip() for r in res.itertext()])
             elif hasattr(res, 'text'):
                 res = res.text()
@@ -301,7 +307,7 @@ class Job:
                 print_items(items)
                 continue
             update = []
-            for i in items[::-1]:
+            for i in items:
                 t = self.item_class(**i)
                 # TODO: Need a simple and efficient method, now use attribute url
                 # for default distinguish value

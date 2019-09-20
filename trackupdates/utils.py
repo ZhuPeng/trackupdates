@@ -109,7 +109,7 @@ markdown2html = deco_markdown2html(gen_markdown)
 
 def json2xml(j):
     x = xmltodict.unparse({'json': j})
-    # print 'xml:', x.encode('utf-8')
+    print 'xml:', x.encode('utf-8')
     return x
 
 
@@ -180,6 +180,15 @@ def get_data_without_js(url, param, retry=3):
 
 none = etree.Element("none")
 none.text = ""
+
+
+def getinnerhtml(data):
+    return data[data.find(">")+1:data.rfind("</")]
+
+
+def tree2html(node):
+    html_data = etree.tostring(node, pretty_print=True)
+    return getinnerhtml(html_data.decode('utf-8'))
 
 
 def get_xpath(ele, path, idx=0):
