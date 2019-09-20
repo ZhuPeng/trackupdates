@@ -142,6 +142,7 @@ jobs:
 
 - name: 'blogkubernetes'
   view: Kubernetes Blog
+  cron: '22|40'
   url:
     type: rss
     test_target: 'testdata/kubernetes_blog'
