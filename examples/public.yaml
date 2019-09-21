@@ -149,6 +149,14 @@ jobs:
     target: https://kubernetes.io/feed.xml
   parser: 'blogkubernetes'
 
+- name: 'blograndylu'
+  view: Randy Lu Blog
+  cron: '5|40'
+  url:
+    type: rss
+    target: https://lutaonan.com/rss.xml
+  parser: 'blograndylu'
+
 - name: 'blogcoreos'
   view: CoreOS Blog
   url:
@@ -309,6 +317,21 @@ parsers:
 
 - name: 'cncfblog'
   base_url: 'https://www.cncf.io/author'
+  base_xpath: 
+  - //entries
+  attr:
+    url: links/href
+    title: title
+    pubdate: published
+    article-date: published
+    tag: tags/term
+    article-body: content/value/@RAW
+    article-author: author
+    article-author_url: author
+    article-author_image: author
+
+- name: 'blograndylu'
+  base_url: https://lutaonan.com
   base_xpath: 
   - //entries
   attr:

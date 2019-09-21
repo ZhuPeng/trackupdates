@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import urllib2
 import urllib
-import lxml.html as html
+import lxml.html as lhtml
+import html
 from lxml import etree
 import HTMLParser
 import markdown2
@@ -188,8 +189,8 @@ def getinnerhtml(data):
 
 
 def tree2html(node):
-    html_data = etree.tostring(node, pretty_print=True)
-    return getinnerhtml(html_data.decode('utf-8'))
+    html_data = unescape(etree.tostring(node, pretty_print=True))
+    return getinnerhtml(html_data)
 
 
 def tree2md(node):
@@ -207,12 +208,16 @@ def get_xpath(ele, path, idx=0):
     return e
 
 
+def unescape(c):
+    html_parser = HTMLParser.HTMLParser()
+    return html_parser.unescape(c)
+
+
 def transfer2dom(content):
     if '<html>' not in content:
         content = '<html>' + content + '</html>'
-    html_parser = HTMLParser.HTMLParser()
-    content = html_parser.unescape(content)
-    dom = html.fromstring(content)
+    content = unescape(content)
+    dom = lhtml.fromstring(content)
     return dom
 
 

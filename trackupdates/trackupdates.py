@@ -29,9 +29,12 @@ from threading import Thread
 import urllib
 import itertools
 from Queue import Queue
+import sys
 logging.basicConfig()
 logger = logging.getLogger(__file__)
 ThreadCount = 3
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 
 class Settings:
