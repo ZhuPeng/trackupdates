@@ -2,7 +2,6 @@
 import urllib2
 import urllib
 import lxml.html as lhtml
-import html
 from lxml import etree
 import HTMLParser
 import markdown2
