@@ -314,6 +314,8 @@ parsers:
     article-author: div[2]/a/p
     article-author_url: div[2]/a/@href
     article-author_image: div[2]/a/div/img/@src
+  format:
+    markdown: '[{title}]({url}) <br> {article-date} {article-author} <br> {article-body}'
 
 - name: 'cncfblog'
   base_url: 'https://www.cncf.io/author'
@@ -329,6 +331,8 @@ parsers:
     article-author: author
     article-author_url: author
     article-author_image: author
+  format:
+    markdown: '[{title}]({url}) <br> {article-date} {article-author} <br> {article-body}'
 
 - name: 'blograndylu'
   base_url: https://lutaonan.com
@@ -344,6 +348,8 @@ parsers:
     article-author: author
     article-author_url: author
     article-author_image: author
+  format:
+    markdown: '[{title}]({url}) <br> {article-date} {article-author} <br> {article-body}'
 
 - name: 'python'
   base_url: 'https://github.com'
@@ -456,6 +462,8 @@ parsers:
     article-author: author
     article-author_url: author
     article-author_image: author
+  format:
+    markdown: '[{title}]({url}) <br> {article-date} {article-author} <br> {article-body}'
 
 - name: 'blogcoreos'
   base_url: 'https://coreos.com'
