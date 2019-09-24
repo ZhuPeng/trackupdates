@@ -72,6 +72,13 @@ jobs:
     target: https://www.cncf.io/feed/
   parser: 'cncfblog'
 
+- name: 'coolshell'
+  view: CoolShell
+  cron: '5|10'
+  url:
+    type: rss
+    target: https://coolshell.cn/feed
+  parser: 'coolshell'
 
 - name: 'python'
   view: GitHub Trending
@@ -319,6 +326,23 @@ parsers:
 
 - name: 'cncfblog'
   base_url: 'https://www.cncf.io/author'
+  base_xpath: 
+  - //entries
+  attr:
+    url: links/href
+    title: title
+    pubdate: published
+    article-date: published
+    tag: tags/term
+    article-body: content/value/@RAW
+    article-author: author
+    article-author_url: author
+    article-author_image: author
+  format:
+    markdown: '[{title}]({url}) <br> {article-date} {article-author} <br> {article-body}'
+
+- name: 'coolshell'
+  base_url: https://coolshell.cn
   base_xpath: 
   - //entries
   attr:
