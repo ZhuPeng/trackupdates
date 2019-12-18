@@ -19,7 +19,7 @@ def md(lang, jobname='python'):
     collect = []
     for r in res:
         tmp = [
-            '* [%s](%s)\n' % (r['repo'], r['url']),
+            '[%s](%s)\n' % (r['repo'], r['url']),
             'Star: %s, Fork: %s\n' % (r['star'], r['fork']),
             r['desc'],
         ]
@@ -38,7 +38,7 @@ def md(lang, jobname='python'):
 
 def genBlog(r):
     tmp = [
-        '* [%s](%s)\n' % (r['title'], r['url'].replace('http://', 'https://')),
+        '[%s](%s)\n' % (r['title'], r['url'].replace('http://', 'https://')),
         r.get('abstract', ''),
     ]
     if r.get('article-image_url', '') != '':
