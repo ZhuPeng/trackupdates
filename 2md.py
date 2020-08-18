@@ -5,9 +5,9 @@ import datetime
 from urllib import quote
 weekAgo = (datetime.datetime.now() - datetime.timedelta(days=7))
 weekAgoStr = weekAgo.strftime("%Y-%m-%d")
-qrcode = u'扫码关注如下微信公众号，定期获取 GitHub Trending 更新推送。\n\n![wechat](https://7465-test-3c9b5e-1258459492.tcb.qcloud.la/common/ultrabot-qrcode.png)\n'
+qrcode = u'扫码关注如下微信公众号，定期获取开源项目或书籍推荐。\n\n![wechat](https://7465-test-3c9b5e-1258459492.tcb.qcloud.la/common/ultrabot-qrcode.png)\n'
 # footer = u'*****\n[点击查看自动插入小程序链接指南](https://github.com/ZhuPeng/mp-transform-public)\n\n以上就是本期周报的内容，我们下周见。欢迎大家与我交流，点击访问 [GitHub 小程序](https://github.com/) 。%s' % qrcode
-footer = u'*****\n\n以上就是本期周报的内容，我们下周见。%s' % qrcode
+footer = u'*****\n\n以上就是本期推荐的内容，欢迎留言交流。%s' % qrcode
 
 
 def md(lang, jobname='python'):
@@ -37,13 +37,26 @@ def md(lang, jobname='python'):
 
 
 def genBlog(r):
+    url = r['url'].replace('http://', 'https://')
     tmp = [
         '[%s](%s)\n' % (r['title'], r['url'].replace('http://', 'https://')),
         r.get('abstract', ''),
     ]
     if r.get('article-image_url', '') != '':
         tmp.append('![](%s)' % r['article-image_url'])
+    if r.get('content', '') != '':
+        tmp.append('\n' + r['content'])
+    tmp.append(u'\n[点击阅读详情](%s)' % url)
     return '\n'.join(tmp) + '\n\n\n\n'
+
+
+def book_md():
+    md = u'大家好！我是超级机器人 UltraBot，今天给大家一些值得阅读的开源书籍和项目。\n\n'
+    blogs = getBlog(server='http://localhost:8081')
+    for b in blogs:
+        md += genBlog(b)
+    md += footer
+    print md.encode('utf-8')
 
 
 def tech_bolg_md(jobname='jianshu'):
@@ -77,7 +90,7 @@ def isTech(r):
 
 
 def getBlog(server="http://localhost:8888"):
-    target = server + '/blog'
+    target = server + '/blog?page=1&order_time=asc&page_size=5'
     res = requests.get(target).json()['data']
     return res
 
@@ -96,5 +109,7 @@ if __name__ == '__main__':
         exit(1)
     if sys.argv[1] == u"TECHBLOG":
         tech_bolg_md()
+    if sys.argv[1] == u"book":
+        book_md()
     else:
         md(sys.argv[1])
