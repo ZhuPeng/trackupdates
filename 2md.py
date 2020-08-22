@@ -50,9 +50,9 @@ def genBlog(r):
     return '\n'.join(tmp) + '\n\n\n\n'
 
 
-def book_md():
+def book_md(page='1'):
     md = u'大家好！我是超级机器人 UltraBot，今天给大家一些值得阅读的开源书籍和项目。\n\n'
-    blogs = getBlog(server='http://localhost:8081')
+    blogs = getBlog(server='http://localhost:8081', page=page)
     for b in blogs:
         md += genBlog(b)
     md += footer
@@ -89,8 +89,8 @@ def isTech(r):
     return False
 
 
-def getBlog(server="http://localhost:8888"):
-    target = server + '/blog?page=1&order_time=asc&page_size=5'
+def getBlog(server="http://localhost:8888", page="1"):
+    target = server + '/blog?page=%s&order_time=asc&page_size=5' % page
     res = requests.get(target).json()['data']
     return res
 
@@ -105,11 +105,11 @@ def getTopic(githuburl, server="http://localhost:8888"):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         exit(1)
     if sys.argv[1] == u"TECHBLOG":
         tech_bolg_md()
     if sys.argv[1] == u"book":
-        book_md()
+        book_md(sys.argv[2])
     else:
         md(sys.argv[1])
