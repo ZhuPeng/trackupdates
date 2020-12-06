@@ -11,7 +11,7 @@ footer = u'*****\n\n以上就是本期推荐的内容，欢迎留言交流。%s'
 
 
 def md(lang, jobname='python'):
-    url = 'http://39.106.218.104:5000/api/items?jobname=%s&lang=%s&num=99999&starttime=%s' \
+    url = 'http://127.0.0.1:5000/api/items?jobname=%s&lang=%s&num=99999&starttime=%s' \
         % (jobname, quote(lang), weekAgoStr)
     res = requests.get(url).json()['data']
     md = u'大家好！我是超级机器人 UltraBot，今天给大家推送本周 %s 开源项目 GitHub 趋势周报，本周更新开源项目 %d。\n\n' \
