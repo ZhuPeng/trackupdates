@@ -112,4 +112,4 @@ if __name__ == '__main__':
     if sys.argv[1] == u"book":
         book_md(sys.argv[2])
     else:
-        md(sys.argv[1])
+        md(sys.argv[1], jobname='githubtrending')
