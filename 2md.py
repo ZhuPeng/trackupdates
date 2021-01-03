@@ -25,6 +25,8 @@ def md(lang, jobname='python'):
         ]
         topics = getTopic(r['url'])
         for t in topics:
+            if len(t['content']) > 500:
+                continue
             tmp.append('\n>%s\n>%s-- %s' % (t['content'].replace('\n', '\n>'), ' '*40, t['username']))
         tmp = '\n'.join(tmp) + '\n\n\n\n'
         if len(topics) == 0:
