@@ -1,4 +1,5 @@
 weekly.2020*
+weekly/
 .*.un~
 # Byte-compiled / optimized / DLL files
 __pycache__/
