@@ -17,7 +17,7 @@ def genlayout(options):
     selectAllCheckbox = dcc.Checklist(
         id='select-all',
         options=[{'label': 'Select All', 'value': 'Select All'}],
-        values=['Select All']
+        value=['Select All']
     )
     style = {'width': '75%', 'float': 'right', 'display': 'inline-block', 'line-height': '60px'}
 
@@ -57,7 +57,7 @@ def gendash(server, sched):
 
     app.layout = genlayout(jobs.keys())
 
-    @app.callback(Output('item-dropdown', 'value'), [Input('select-all', 'values')])
+    @app.callback(Output('item-dropdown', 'value'), [Input('select-all', 'value')])
     def select_all(select):
         print 'select_all: ', select
         if 'Select All' in select:
