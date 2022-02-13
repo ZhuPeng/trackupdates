@@ -139,7 +139,7 @@ def get_data(url, param, retry=3):
             res = get_rss(url)
         else:
             res = get_data_without_js(url, p, retry)
-        # print "%s result => %s" % (url, res)
+        logger.debug('get_data result: %s => %s', url, res)
         return res
     except Exception as e:
         print 'get_data(%s) Exception: %s' % (url, e)
@@ -169,7 +169,7 @@ def get_data_without_js(url, param, retry=3):
         try:
             opener = urllib2.build_opener()
             opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-            f = opener.open(url, None, 120)
+            f = opener.open(url, None, timeout=30)
 
             rawdata = f.read()
             result = decode_rawdata(rawdata)
