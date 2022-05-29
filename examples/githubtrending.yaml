@@ -18,6 +18,14 @@ jobs:
       lang: 
         - type: string
           value: all
+        - type: string
+          value: go 
+        - type: string
+          value: python
+        - type: string
+          value: java 
+        - type: string
+          value: markdown
         - type: distinct
           value: lang
   parser: 'githubtrending'
@@ -26,15 +34,15 @@ parsers:
 - name: 'githubtrending'
   base_url: 'https://github.com'
   base_xpath: 
-  - "//li[@class='col-12 d-block width-full py-4 border-bottom']"
+  - "//article[@class='Box-row']"
   attr:
-    url: 'div/h3/a/@href'
-    repo: 'div/h3/a'
-    desc: "div[@class='py-1']/p"
+    url: 'h1/a/@href'
+    repo: 'h1/a'
+    desc: "p"
     lang: "div/span/span[@itemprop='programmingLanguage']"
-    star: "div/a[@aria-label='Stargazers']"
-    fork: "div/a[@aria-label='Forks']"
-    today: "div/span[@class='float-right']"
+    star: "div/a[1]"
+    fork: "div/a[2]"
+    today: "div/span[3]"
   format:
     markdown: '[{lang}: {repo}]({url}), star: {star}, fork: {fork}, today-star: {today} <br> {desc}' 
     html: '<p><a href="{url}">{lang}: {repo}</a> start: {star}, fork: {fork}, today-star: {today}, {desc}</p>'
