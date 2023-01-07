@@ -19,10 +19,10 @@ Options:
 from docopt import docopt
 import yaml
 import logging
-import utils
+from . import utils
 from datetime import datetime, timedelta
 import database
-import server
+from . import server
 import random
 import thread
 from threading import Thread
@@ -106,17 +106,18 @@ def new_mailer_from_settings(settings):
 class Parser:
     def __init__(self, config):
         self.config = config
-        self.base_url = config['base_url']
+        self.base_url = config.get('base_url', '')
+        self.name = config.get('name', 'NOT SET')
 
     def parse(self, content):
         items = []
-        logger.debug("[%s] parsed content: %s", self.config['name'], content)
+        logger.debug("[%s] parsed content: %s", self.name, content)
         dom = utils.transfer2dom(content)
         base_xpath = self.config['base_xpath']
         for bx in base_xpath:
             for ele in dom.xpath(bx)[::-1]:
                 items.append(self._parse_item(ele))
-        logger.debug("[%s] parsed items: %d %s", self.config['name'], len(items), items)
+        logger.debug("[%s] parsed items: %d %s", self.name, len(items), items)
         return items
 
     def _parse_item(self, ele):
@@ -145,7 +146,7 @@ class Parser:
         d['_crawl_time'] = datetime.now()
         for k, v in concat:
             d[k] = eval(v, d.copy())
-        logger.debug("[%s] parsed item: %s", self.config['name'], d)
+        logger.debug("[%s] parsed item: %s", self.name, d)
         return d
 
 
