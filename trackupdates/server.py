@@ -2,7 +2,7 @@
 import yaml
 import os
 import markdown2
-import appdash
+from . import appdash
 import logging
 from signal import signal, SIGINT, SIGTERM
 from flask import Flask, request, jsonify, abort, send_from_directory

@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-import urllib2
 import urllib
 import lxml.html as lhtml
 from lxml import etree
-import HTMLParser
+from html.parser import HTMLParser
 import markdown2
 import time
 import chardet
@@ -46,8 +45,8 @@ def get_session_request(url):
                         continue
                     request.headers.update({h['name']: h['value']})
         request.headers.update({'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'})
-        print 'request cookies: ' + str(request.cookies)
-        print 'request headers: ' + str(request.headers)
+        print('request cookies: ' + str(request.cookies))
+        print('request headers: ' + str(request.headers))
         driver.quit()
         SESSION[url] = request
     else:
@@ -142,7 +141,7 @@ def get_data(url, param, retry=3):
         logger.debug('get_data result: %s => %s', url, res)
         return res
     except Exception as e:
-        print 'get_data(%s) Exception: %s' % (url, e)
+        print('get_data(%s) Exception: %s' % (url, e))
     return ''
 
 
@@ -156,7 +155,7 @@ def get_data_with_js(url):
         time.sleep(3)
         res = driver.page_source
     except Exception as e:
-        print 'get_data_with_js(%s) Exception: %s' % (url, e)
+        print('get_data_with_js(%s) Exception: %s' % (url, e))
     finally:
         driver.quit()
     return res
@@ -167,15 +166,20 @@ def get_data_without_js(url, param, retry=3):
     while retry:
         retry -= 1
         try:
-            opener = urllib2.build_opener()
-            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-            f = opener.open(url, None, timeout=30)
-
+            import urllib.request
+            req = urllib.request.Request(
+                url,
+                data=None,
+                headers={
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+                }
+            )
+            f = urllib.request.urlopen(req, timeout=30)
             rawdata = f.read()
             result = decode_rawdata(rawdata)
             break
         except Exception as e:
-            print 'get_data(%s) Exception: %s' % (url, e)
+            print('get_data(%s) Exception: %s' % (url, e))
     return result
 
 
@@ -208,7 +212,7 @@ def get_xpath(ele, path, idx=0):
 
 
 def unescape(c):
-    html_parser = HTMLParser.HTMLParser()
+    html_parser = HTMLParser()
     return html_parser.unescape(c)
 
 
@@ -241,11 +245,11 @@ def decode_rawdata(rawdata):
 
 
 def read_content(filename):
-    print 'read content from local file: %s' % filename
+    print('read content from local file: %s' % filename)
     f = open(filename, 'r')
     rawdata = f.read()
     f.close()
     return decode_rawdata(rawdata)
 
 if __name__ == '__main__':
-    print get_data('https://github.com/trending/Vue?since=daily', {'withjs': False})
+    print(get_data('https://github.com/trending/Vue?since=daily', {'withjs': False}))

@@ -21,20 +21,16 @@ import yaml
 import logging
 from . import utils
 from datetime import datetime, timedelta
-import database
-from . import server
+from . import database
 import random
-import thread
+import _thread as thread
 from threading import Thread
 import urllib
 import itertools
-from Queue import Queue
-import sys
+from queue import Queue
 logging.basicConfig()
 logger = logging.getLogger(__file__)
 ThreadCount = 3
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 
 class Settings:
@@ -139,7 +135,7 @@ class Parser:
             elif hasattr(res, 'text'):
                 res = res.text()
 
-            res = unicode(res).strip()
+            res = res.strip()
             if k.endswith('url') and not res.startswith('http'):
                 res = self.base_url.rstrip('/') + '/' + res.lstrip('/')
             d[k] = res
@@ -460,6 +456,7 @@ def main():
     sched = Scheduler(args['<yaml>'], test=args['--test'], runjobs=args['--runjobs'], blocking=False or noserver, runoneloop=runoneloop, first_run_all=first_run_all)
     sched.run()
     if not runoneloop and not noserver:
+        from . import server
         server.Server(sched).run()
 
 

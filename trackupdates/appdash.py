@@ -59,7 +59,7 @@ def gendash(server, sched):
 
     @app.callback(Output('item-dropdown', 'value'), [Input('select-all', 'value')])
     def select_all(select):
-        print 'select_all: ', select
+        print('select_all: ', select)
         if 'Select All' in select:
             return jobs.keys()
         return jobs.keys()[0]
@@ -107,7 +107,7 @@ def gendash(server, sched):
     def db_select(dropdown_values, start_date):
         if type(dropdown_values) is not list:
             dropdown_values = [dropdown_values]
-        print 'callback: ', start_date, ', '.join(dropdown_values)
+        print('callback: ', start_date, ', '.join(dropdown_values))
 
         data, x = {}, []
         now = dt.now()

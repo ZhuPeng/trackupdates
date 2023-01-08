@@ -37,20 +37,20 @@ import requests
 def downloadfile(name, url):
     name = name+".mp4"
     r = requests.get(url)
-    print "****Connected****"
+    print("****Connected****")
     f=open(name, 'wb');
-    print "Donloading....."
+    print("Donloading.....")
     for chunk in r.iter_content(chunk_size=255):
         if chunk: # filter out keep-alive new chunks
             f.write(chunk)
-    print "Done"
+    print("Done")
     f.close()
 
 for res in crawl.get_result():
     for r in res[::-1]:
-        print r
+        print(r)
         video_url = 'https://y.yarn.co/' + r['url'].split('/')[-1] + '.mp4'
-        print video_url
+        print(video_url)
         downloadfile(r['title'], video_url)
         break
     break
