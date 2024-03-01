@@ -5,7 +5,7 @@ chardet
 docopt
 pytest==2.5.0
 dash==1.3.1
-dash-html-components==1.0.1
+dash-html-components==2.0.0
 dash-core-components==1.2.1
 dash-table==4.3.0
 nltk
